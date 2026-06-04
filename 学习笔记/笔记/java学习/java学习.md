@@ -1,5 +1,5 @@
 1. Java基础      [[java基础]]
-2. java wed     [[java_web]]
+2. java web     [[java_web]]
 
 
 # 学习计划
