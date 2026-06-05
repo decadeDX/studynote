@@ -4,6 +4,8 @@ focused: 00:00:25
 ---
 # 总目录：
 [[java学习]]
+# 关键字
+[[java关键字]]
 # 1.变量
 ## 数据类型：
 ### 基本数据类型：
@@ -114,7 +116,7 @@ public class Test{
 
 ```
 # 3.修饰符
-## 非访问修饰符：
+## 1.非访问修饰符：
 
 |     |     关键字      | 核心含义 |     修饰对象      |      关键点       |
 | :-: | :----------: | :--: | :-----------: | :------------: |
@@ -125,15 +127,29 @@ public class Test{
 
 一个类不能同时被 abstract 和 final 修饰。如果一个类包含抽象方法，那么该类一定要声明为抽象类，否则将出现编译错误。
 抽象类可以包含抽象方法和非抽象方法。
-## 访问修饰符：
+## 2.==访问修饰符==：
 
+### 1. 类与成员的访问权限
  default, public , protected, private
-
 - 父类中声明为 public 的方法在子类中也必须为 public。
 - 父类中声明为 protected 的方法在子类中要么声明为 protected，要么声明为 public，不能声明为 private。
 - 父类中声明为 private 的方法，不能够被子类继承。
+### 2. 四种权限（范围从大→小）
 
+|     | 修饰符                   | 访问范围             |
+| --- | --------------------- | ---------------- |
+|     | `public`（公共）          | 任意包、任意类都能访问      |
+|     | `protected`（受保护）      | 本类 + 同包类 + 不同包子类 |
+|     | **默认（缺省 / 包访问，无关键字）** | 仅**同一个包**内可用     |
+|     | `private`（私有）         | **只能本类内部访问**     |
 
+### 3. 作用区分
+#### ① 修饰「类本身」
+- 顶层类：只能用 `public` / **默认**，不能用 `protected、private`
+- 内部类：四种权限全都可以修饰
+
+#### ② 修饰成员（属性、方法、构造器）
+**四种权限全部可用**。
 
 # 4.运算符
 
@@ -439,13 +455,140 @@ class Outer02 {  //外部类
 }
 ```
 ###  ==2.匿名内部类（重点）==
-1. 本质是类，该类没有名字（匿名内部类的名字我们看不到，但系统会给他一个名字）；同时还是一个对象
+基本语法：
+```java
+new 类/接口名(参数列表){
+	类体
+}
+```
+1. 本质是类，该类没有名字（匿名内部类的名字我们看不到，但系统会给他一个名字）；==同时还是一个对象==
 2. 匿名内部类是定义在外部类中的局部位置，比如方法中
-3. 用于简化开发，某些接口只需要用一次，后续不用，传统基于接口创建类，实例化有些啰嗦，而用匿名内部类只使用一次，后续不能再用
+3. 用于简化开发，某些接口只需要用一次，后续不用，传统基于接口创建类，实例化有些啰嗦，而用==匿名内部类只使用一次，后续不能再用==
 
-# 13.异常处理
+示例：
+```java
+package com.example.demo.InnerClass;  
+  
+public class AnonymousInnerClass {  
+    public static void main(String[] args){  
+        Outer04 outer04 = new Outer04();  
+        outer04.method();  
+    }  
+}  
+  
+class Outer04{  
+    private int num = 10;  
+  
+    public void  method() {  
+        //基于接口的匿名内部类  
+        /*  
+        a的编译类型是A02  
+        运行类型是Outer04$1  
+         */        A02 a = new A02(){  
+            @Override  
+            public void cry() {  
+                System.out.println("hello");  
+            }  
+        };  
+        System.out.println("a的运行类型" + a.getClass());  
+        a.cry();  
+  
+        //基于类的匿名内部类  
+        Father father = new Father("jack") {  
+            @Override  
+            public void test(){  
+                System.out.println("匿名内部类的test（）方法");  
+            }  
+        };//加{}运行类型会变为Outer04$2  
+        //不加，运行类型是Father  
+        System.out.println("father的运行类型" + father.getClass());  
+        father.test();  
+  
+    }  
+}
+interface A02 {  
+    public void cry();  
+}  
+  
+class Father {  
+    public Father(String name){  
+    }  
+    public void test(){  
+  
+    }  
+}
+```
+
+### 3. 成员内部类
+定义在外部类的成员位置，没用static修饰，可以访问外部类的所有成员，包含私有的
+1. 作用域和外部类的其他成员一样，为==整个类体==
+2. 外部类和局部内部类成员重名，遵循就近原则，如果想访问外部类成员，使用==*外部类名.this.成员*==  
+### 4.静态内部类
+定义在外部类的成员位置，并且有static修饰，可以访问外部类的所有成员，包含私有的，但是不能直接访问非静态成员
+1. 作用域和外部类的其他成员一样，为==整个类体==
+2. 外部类和局部内部类成员重名，遵循就近原则，如果想访问外部类成员，使用==*外部类名.成员*==  
+
+# 13.枚举
+枚举是一组常量的集合，可以这样理解：枚举属于一种特殊的类，里面只包含一组有限的特定的对象
+## 两种实现方式
+1) 自定义类实现枚举
+	- 第一步，将构造器私有化，目的防止直接new
+	- 第二步，去掉set方法，防止属性被修改
+	- 第三步，直接实例化固定对象
+	- 可以优化，加入final修饰符
+2) 使用enum关键字实现枚举
+	- 使用关键字enum替代class
+	- 通常将定义常量对象写在前面，枚举类的对象必须写在行首
+	- 如果使用无参构造器创建常量对象，则可以简化后面的()
+
+示例：
+```java
+public class EnumClassExercise01 {  
+    public static void main(String[] args){  
+        System.out.println(Season.SPRING.toString());  
+  
+    }  
+}  
+  
+  
+enum Season {  
+    SPRING("春天","温暖"),SUMMER("夏天","炎热"),  
+    AUTUMN("秋天","凉爽"),WINTER("冬天","寒冷");  
+    private final String seasonName;  
+    private final String seasonDesc;  
+  
+  
+    private Season(String seasonName,String seasonDesc){  
+        this.seasonName = seasonName;  
+        this.seasonDesc = seasonDesc;  
+    }  
+  
+    public String getSeasonName(){  
+        return seasonName;  
+    }  
+  
+    public String getSeasonDesc(){  
+        return seasonDesc;  
+    }  
+  
+    @Override  
+    public String toString() {  
+        return "seasonName=" + seasonName + " seasonDesc=" + seasonDesc;  
+    }  
+}
+```
+# 14.注解
+也被称为元数据（Metadata)，用于修饰解释包、类、方法、属性、构造器、局部变量等数据信息
+### 三个基本注解
+@interface 表明是注解类，这个不是interface
+1. @Override：限定某个方法，是重写赴俄历方法，该注解只能用于方法
+	1. 加了该注解，编译器就好检查是否真的重写，如果没有，则编译报错
+2. @Deprecated：用于表示某个程序元素（类、方法等）已过时，==即不再推荐使用，但任然可以使用==
+3. @SuppressWarnings：抑制编译器警告
+
+# 15.异常处理
 程序执行中发生的不正常情况称为“异常”。（语法错误和逻辑错误不是异常）
-
+## 1.异常
 异常分为两类：
 1) Error(错误)：java虚拟机无法解决的严重问题。如JVM系统内部错误、资源耗尽。
 Error是严重错误，程序会崩溃
@@ -453,8 +596,7 @@ Error是严重错误，程序会崩溃
 2) Exception: 其他因编程错误或偶然的外在因素导致的一般性问题，可以使用针对性的代码进行处理。例如空指针访问，试图读取不存在的文件，网络中断等等
 Exception分为两大类：运行时异常、编译时异常
 
-# 14.关键字
-[[java关键字]]
+## 2.五大运行时异常
 
 
 
