@@ -1,14 +1,11 @@
 {
-  "accentColor": "#566767",
   "cssTheme": "Minimal",
-  "translucency": false,
   "enabledCssSnippets": [
     "表格优化",
     "段落首行缩进",
     "预览模式优化-空白行-行间距",
     "AnuExtendTheme",
-    "yaozhuwa@CSS"
-  ],
-  "interfaceFontFamily": "",
-  "theme": "moonstone"
+    "yaozhuwa@CSS",
+    "网格背景"
+  ]
 }

@@ -27,10 +27,14 @@ columns:
 
 ## 备忘录
 
-### 2026-06-02 备忘录
-id: card-mpvxvzqd
-java学习
-python学习
+### 2026-06-09 备忘录
+id: card-mq63iyxp
+完成java异常、IO、反射
+
+### 2026-06-09 备忘录
+id: card-mq63lbop
+FreeRTOS简单了解
+STM32
 
 ## 代办事项
 
@@ -41,7 +45,6 @@ type: task
 - [ ] java 异常
 - [ ] java IO
 - [ ] java 反射
-- [ ] java 多线程
 - [x] java 内部类
 - [x] java 接口
 
@@ -56,11 +59,23 @@ type: task
 - [ ] 接口默认方法
 - [ ] java web
 
+### 代办清单
+id: card-mq63h2de
+type: task
+- [ ] freeRTOS
+- [ ] STM32
+- [ ] Linux驱动
+
 ## 笔记
 
 ### java学习
 id: demo-project-1
 type: project
 [[学习笔记/笔记/java学习/java基础/java基础.md]]
+
+### FreeRTOS学习笔记
+id: card-mq63irzl
+type: project
+[[学习笔记/笔记/FreeRTOS学习笔记.md]]
 
 ## 需要用的知识库
