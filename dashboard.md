@@ -20,7 +20,7 @@ columns:
   - name: 笔记
     color: "#10b981"
     type: projects
-  - name: 需要用的知识库
+  - name: 需要用的知识库/目录
     color: "#8b5cf6"
     type: projects
 ---
@@ -42,11 +42,11 @@ STM32
 id: card-mpwj1oc2
 type: task
 - [ ] 上周未完成
-- [ ] java 异常
 - [ ] java IO
 - [ ] java 反射
 - [x] java 内部类
 - [x] java 接口
+- [x] java 异常
 
 ### 待办清单
 id: card-mpwj3tyy
@@ -71,11 +71,26 @@ type: task
 ### java学习
 id: demo-project-1
 type: project
-[[学习笔记/笔记/java学习/java基础/java基础.md]]
+[[java基础]]
 
 ### FreeRTOS学习笔记
 id: card-mq63irzl
 type: project
 [[学习笔记/笔记/FreeRTOS学习笔记.md]]
 
-## 需要用的知识库
+## 需要用的知识库/目录
+
+### AI操作命令语言指南
+id: card-mq7t0gjs
+type: project
+[[学习笔记/笔记/AI操作命令语言指南.md]]
+
+### java目录导航
+id: card-mq891568
+type: project
+[[学习笔记/笔记/java学习/java学习.md]]
+
+### 机器视觉目录导航
+id: card-mq891fpy
+type: project
+[[学习笔记/笔记/机器视觉/机器视觉.md]]
