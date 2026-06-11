@@ -30,23 +30,21 @@ focused: 00:01:47
 
 - 官方网站中的不同的STM32型号介绍
   
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_0d094433-8d2c-45c4-eedb-715868373833.png?)
-    
+    - 图示
+    - ![[STM32型号介绍.png]]
     - MCU（微控制器）：继承了CPU、内存和外接接口等等，位于一个芯片上，用于特定额度控制应用，比如管理洗衣机的功能、控制机器人的具体操作等等
-    
     - MPU（微处理器）：通常指的是中央处理单元，负责的是指令和数据的处理，需要依赖于外部接口实现具体的操作
 
 - STM32F103C6T6
   
-    - STM32的型号代表的含义![](https://api2.mubu.com/v3/document_image/4733041_7d5c9c51-b78c-464d-c430-1fe490d687c2.png?)
-    
+    - STM32的型号代表的含义![[STM32产品型号含义.png]]
     - F1系列采用的封装方式LQFP（引脚按照顺序只在边上出现），而BGA封装方式按照矩阵进行排列（和电脑CPU一样）
 
 - STM32F103系列芯片的系统架构图，如下
   
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_4965ddc4-962f-48e7-99fe-3930b4c5e87a.png?)
+    - 图示![[STM32F103系列芯片系统架构图.png]]
     
-    - 中文参考手册中详细描述了STM32F103芯片的元器件的关系情况![](https://api2.mubu.com/v3/document_image/4733041_e896c8e7-bc55-405d-b7ac-6dc1a53cbd31.png?)
+    - 中文参考手册中详细描述了STM32F103芯片的元器件的关系情况![[STM32F103芯片的元器件关系.png]]
       
         - FLASH接口单独使用ICode总线是为了提高访问效率
         
@@ -58,7 +56,7 @@ focused: 00:01:47
     
     - STM32的芯片阵脚介绍
       
-        - 图示![](https://api2.mubu.com/v3/document_image/1f29efd8-d72f-4873-b0f9-378303725e01-4733041.jpg?)
+        - 图示![[STM32芯片阵脚介绍.png]]
         
         - 电源引脚：V开头的都是电源引脚，VDD(VCC)电源正极，VSS(GND)电源负极
         
@@ -67,7 +65,7 @@ focused: 00:01:47
         
         - 启动引脚：BOOT引脚
           
-            - STM32的启动方式![](https://api2.mubu.com/v3/document_image/4733041_38de72d5-0fb7-42d4-ff0f-d8f4aa7f7041.png?)
+            - STM32的启动方式![[STM32启动方式.png]]
             
             - BOOT1=X（0或者1）、BOOT0=0，表示STM32以flash的方式进行启动
                 - 我们提供的开发板BOOT0和BOOT1都是接在了GND上，因此使用的是FLASH的方式启动的
@@ -116,11 +114,11 @@ focused: 00:01:47
     
     - Drivers：这个文件夹中有三个目录，BSP目录用于存放ST官方样板板载外设驱动，CMSIS目录用于存放符合CMSIS标准的文件，包括STM32的启动文件、DSP库文件、ARM Cortex内核文件、RTOS操作系统文件
       
-        - CMSIS中必须用到的四个文件![](https://api2.mubu.com/v3/document_image/4733041_4bbe70be-96f6-45e4-a17c-616d53f40f94.png?)
+        - CMSIS中必须用到的四个文件![[CMSIS4种头文件.png]]
         
         - core_cm3.h文件主要是处理一些与编译器相关的条件编译语句，用于屏蔽不同的编译器的差异
         
-        - 下面这个文件主要是启动文件，比如一些比较重要的内容，如中断向量表就是存放在此文件中![](https://api2.mubu.com/v3/document_image/d80a4dd3-4f84-454d-9288-9a4cd64f225a-4733041.jpg?)
+        - 下面这个文件主要是启动文件，比如一些比较重要的内容，如中断向量表就是存放在此文件中![[启动文件.png]]
         
         - stm32f1xx.h
             - 在stm32中如果要使用任何外设，必须要引入此头文件，stm32芯片对应的寄存器的映像就存放在此目录中，也有很多的宏定义。
@@ -143,11 +141,11 @@ focused: 00:01:47
 - STM32的GPIO的介绍，GPIO是通用输入输出端口的简称，可以通过软件来控制其输入和输出高低电平。
 
 - GPIO结构框图
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_dffb3301-f4a9-4057-9e0d-cef6ecf0d9f9.png?)![](https://api2.mubu.com/v3/document_image/4733041_eb9a76da-ef73-4393-bd06-58ed6fbdb99d.png?)
+    - 图示![[GPIO结构框图1.png]]![[GPIO结构框图2.png]]
 
 - 输入部分
   
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_93ad3d6b-3969-46c9-8f91-7cc7990b7c61.png?)
+    - 图示![[GPIO输入部分.png]]
     
     - 保护二极管
       
@@ -179,7 +177,7 @@ focused: 00:01:47
 
 - 输出部分
   
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_0ec47b1e-8432-4523-e4fe-9ef455b4623e.png?)
+    - 图示![[GPIO输出部分.png]]
     
     - P-MOS（N-MOS）管的导通条件为进入P-MOS（N-MOS）管电压和VDD（VSS）不一致
 
@@ -202,13 +200,13 @@ focused: 00:01:47
           
             - 只有N-MOS管导通，P-MOS是不工作的，ODR输出0的时候，通过输出控制器反向为1，N-MOS管就导通、向外输出低电平。如果ODR输出的是1，会被反向为0，N-MOS不导通。
             
-            - 图示![](https://api2.mubu.com/v3/document_image/4733041_7b2c2f50-1a04-41b7-e55a-19df987d3fee.png?)![](https://api2.mubu.com/v3/document_image/4733041_aed8b4e4-32e3-4de2-b097-963d1dbd57ba.png?)
+            - 图示![[开漏模式输出1.png]]![[开漏模式输出2.png]]
         
         - 推挽模式输出
           
             - 推挽模式下，P-MOS和N-MOS都可以工作，当ODR寄存器输出低电平的时候，反向为1，N-MOS管导通，向外输出低电平，如果ODR寄存器输出高电平的时候，反向为0，P-MOS管导通，向外输出高电平。
             
-            - 图示![](https://api2.mubu.com/v3/document_image/4733041_869469bf-89c9-4df3-f0f1-645b93ba3558.png?)
+            - 图示![[推挽模式.png]]
     
     - 复用输出
       
@@ -228,7 +226,7 @@ focused: 00:01:47
 
 - LED灯的点亮
   
-    - 电路图![](https://api2.mubu.com/v3/document_image/4733041_63663b5b-ed6c-4d46-a5eb-53268b855a54.png?)
+    - 电路图![[LED电路图.png]]
     
     - 上图是板载LED的电路图，用PB5、PB6、PB7分别控制led2、led3、led4这三个灯，如果要让LED灯点亮，就需要给PB引脚输出高电平。
 
@@ -276,19 +274,19 @@ focused: 00:01:47
     
     - 代码演示
       
-        - 文件路径![](https://api2.mubu.com/v3/document_image/4733041_0a91bb57-8636-4eab-f0b6-107ded41782a.png?)
+        - 文件路径![[Led文件路径.png]]
         
-        - 将路径添加到项目中![](https://api2.mubu.com/v3/document_image/4733041_3e66d95e-fa51-455c-c2de-a2a43d6a4e40.png?)
+        - 将路径添加到项目中![[Led添加步骤1.png]]
         
-        - 在工程中创建Module部分，添加led.c文件![](https://api2.mubu.com/v3/document_image/4733041_c5d88fd2-6dc1-4815-b7e8-2848852fffbd.png?)
+        - 在工程中创建Module部分，添加led.c文件![[Led添加步骤2.png]]
         
-        - 在led.c中引入led.h后进行编译，即可将led.h挂载到led.c文件下![](https://api2.mubu.com/v3/document_image/4733041_8fc0b84a-a84c-49b6-e38f-29fcd220fbcb.png?)
+        - 在led.c中引入led.h后进行编译，即可将led.h挂载到led.c文件下![[Led添加步骤3.png]]
         
-        - led.h![](https://api2.mubu.com/v3/document_image/005e3fa4-a525-4386-ba61-d64a684b4ad2-4733041.jpg?)
+        - led.h![[Led头文件.png]]
         
-        - led.c![](https://api2.mubu.com/v3/document_image/4733041_aacdffb0-1c78-4feb-acfc-70850b24eedf.png?)
+        - led.c![[LedC文件.png]]
         
-        - main.c![](https://api2.mubu.com/v3/document_image/4733041_e795c4ff-941f-412b-f99f-5b08ac012fd7.png?)
+        - main.c![[Led主函数.png]]
 
 ## 蜂鸣器实现
 
@@ -305,29 +303,29 @@ focused: 00:01:47
       
         - 三极管有：基极、集电极和发射极
         
-        - NPN类型![](https://api2.mubu.com/v3/document_image/4733041_e4675fc6-71cc-4e68-9d66-04b3a58fc590.png?)
+        - NPN类型![[三极管.png]]
             - NPN类型三极管的导通条件是b极电压要高于e极电压0.7v，此时C极和b极电流都可以流向e极
         
-        - PNP类型![](https://api2.mubu.com/v3/document_image/4733041_3867ec8e-0467-4b3e-a2c1-9c938cd3d574.png?)
+        - PNP类型![[PNP类型三极管.png]]
             - PNP三级管的导通条件是e极电压要高于b极电压0,7v，此时e极和b极的电流都可以流向c极
 
 - 蜂鸣器的硬件设计电路图
   
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_448aba8d-97cd-4f16-e21f-eda457bd3c74.png?)
+    - 图示![[蜂鸣器硬件设计电路图.png]]
     
     - 根据STM32F1芯片手册，知道单个IO口最大输出电流是25mA，而蜂鸣器的驱动电流是30mA，虽然看起来可以直接用IO口来驱动，但是电路并未这样设计，原因是芯片的整个输出电流，最大是150mA，那么最多用6个IO口都输出25mA的电流，会将电流使用枯竭，所以一般IO口只做控制，不做驱动，驱动的电流是直接从板子的电源来获取的。
 
-- beep.h![](https://api2.mubu.com/v3/document_image/f312d2e2-cec7-4787-a76c-8999c1e5e2f5-4733041.jpg?)
+- beep.h![[Beep头文件.png]]
 
-- beep.c![](https://api2.mubu.com/v3/document_image/4733041_fc68da8a-4cfd-4415-931c-899c1ea21acf.png?)
+- beep.c![[BeepC文件.png]]
 
-- main.c![](https://api2.mubu.com/v3/document_image/4733041_678b61f6-0dc7-4eaf-f89d-ef7db30a5e19.png?)
+- main.c![[Beep主函数.png]]
 
 ## 火焰传感器
 
-- 图示![](https://api2.mubu.com/v3/document_image/4733041_afb80160-2409-41d6-ae37-a410b70a88a7.png?)
+- 图示![[火焰传感器图示.png]]
 
-- 电路图![](https://api2.mubu.com/v3/document_image/4733041_3dceb624-f4f8-4eb5-b0a2-4b9e504b4211.png?)
+- 电路图![[火焰传感器电路图.png]]
 
 - 火焰传感器是一种常用检测特定波长（760nm~1100nm）的红外光传感器，探测角度60°左右，对火焰光比较敏感，传感器的灵敏度可以调节。对火焰的探测距离与灵敏度和火焰强度是有关系的，一般在1米以内，有比较强的适用性，主要用于工业自动化、安全监控、消防预警等领域。
 
@@ -347,11 +345,11 @@ focused: 00:01:47
 
 - 代码演示
   
-    - fire.h![](https://api2.mubu.com/v3/document_image/cf51c519-340f-4a17-b568-9be66aa3e9a8-4733041.jpg?)
+    - fire.h![[Fire头文件.png]]
     
-    - fire.c![](https://api2.mubu.com/v3/document_image/4733041_8c59c33f-0700-4611-986c-9d3d7c7b3cef.png?)
+    - fire.c![[FireC文件.png]]
     
-    - main.c![](https://api2.mubu.com/v3/document_image/4733041_89d4abf0-4ba8-42f2-ab85-b4b72c96de2f.png?)
+    - main.c![[Fire主函数.png]]
 
 ## STM32时钟系统
 
@@ -359,7 +357,7 @@ focused: 00:01:47
   
     - 时钟是具有周期性的脉冲信号，它可以为单片机提供一个稳定的机器周期从而让系统可以正常运行，使用任何外设之前必须要先使能时钟。
     
-    - 图示![](https://api2.mubu.com/v3/document_image/3c0d02e5-c1d4-479d-a216-be5ef8912d9c-4733041.jpg?)
+    - 图示![[STM32时钟树.png]]
     
     - 解释说明
       
@@ -441,9 +439,9 @@ focused: 00:01:47
 
 - 代码演示
   
-    - sysclk.h![](https://api2.mubu.com/v3/document_image/e8d60abf-732f-43f6-bbf0-e95475af6edf-4733041.jpg?)
+    - sysclk.h![[Sysclk头文件.png]]
     
-    - sysclk.c![](https://api2.mubu.com/v3/document_image/4733041_9225adf8-b5db-4301-fa1a-a2f8c0972f38.png?)
+    - sysclk.c![[SysclkC文件.png]]
 
 ## 系统滴答定时器（SysTcik）
 
@@ -453,7 +451,7 @@ focused: 00:01:47
     
     - 由时钟树可知，systick时钟源来自于AHB总线的8分频得到的，就是8MHz。
     
-    - 基本运行原理![](https://api2.mubu.com/v3/document_image/4733041_1d220dc2-531d-4818-bb38-f71c53ad004d.png?)
+    - 基本运行原理![[系统滴答定时器基本运行原理.png]]
 
 - SysTick定时器寄存器
   
@@ -461,7 +459,7 @@ focused: 00:01:47
     
     - CTRL寄存器
       
-        - 图示![](https://api2.mubu.com/v3/document_image/4733041_358f09fd-8155-4065-e8d4-f99c4decbc91.png?)
+        - 图示![[CTRL寄存器.png]]
         
         - 解释
           
@@ -475,13 +473,13 @@ focused: 00:01:47
     
     - LOAD寄存器，重装载寄存器
       
-        - 图示![](https://api2.mubu.com/v3/document_image/4733041_7313d834-b477-4c1e-ff58-7b11596bb8c0.png?)
+        - 图示![[LOAD寄存器.png]]
         
         - 解释
             - 因为是一个24位向下递减的计数器，所以重装载寄存器只使用低24位，即0~23bit。当系统复位的时候，其值为0，每次VAL=0的时候，会从LOAD寄存器中将值装载到VAL寄存器，开始进行计数。
     
     - VAL寄存器，当前数值寄存器
-        - 图示![](https://api2.mubu.com/v3/document_image/4733041_4d9fa4ed-d8b9-4887-c21d-a5495051bb65.png?)
+        - 图示![[VAL寄存器.png]]
 
 - SysTick定时器操作步骤
   
@@ -497,15 +495,15 @@ focused: 00:01:47
         - 打开SysTick定时器（SysTick->CTRL）
     
     - HAL库中有函数可以直接翻转相应引脚的电平值
-        - 例![](https://api2.mubu.com/v3/document_image/4733041_79b42d1a-4af4-4457-ca3e-461ea4085b1f.png?)
+        - 例![[HAL库中电平翻转函数.png]]
 
 - 代码演示
   
-    - systick.h![](https://api2.mubu.com/v3/document_image/4733041_6d2779e3-660d-4c4e-8753-de528abc00e4.png?)
+    - systick.h![[Systick头文件.png]]
     
-    - systick.c![](https://api2.mubu.com/v3/document_image/4733041_8ef2057e-808b-4250-8e98-599d4f176f3e.png?)
+    - systick.c![[SystickC文件.png]]
     
-    - mian.c![](https://api2.mubu.com/v3/document_image/4733041_f612df07-598f-451f-aaa3-cc58749ac757.png?)
+    - mian.c![[Systick主函数.png]]
 
 ## 独立按键
 
@@ -513,25 +511,25 @@ focused: 00:01:47
   
     - 按键是一种电子开关，使用的时候按下按键就能接通电源，变成低电平，抬起的时候会变成高电平，板载有四个独立按键。
     
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_fb993868-2204-45c9-d6c5-e12cb3015256.png?)
+    - 图示![[独立按键图示.png]]
     
     - 按键管脚两端比较长的1-3,、2-4默认是导通状态，距离短的是1-2、3-4是断开状态，如果按下按键的时候，初始的导通变为断开，初始的断开变为导通，通常按键所用开关是机械开关，接触和断开的时候就会出现抖动的情况。
     
-    - 按键按下和抬起的情况：![](https://api2.mubu.com/v3/document_image/f4a91b21-d364-4095-9fd2-75776d25331f-4733041.jpg?)
+    - 按键按下和抬起的情况：![[抖动.png]]
     
     - 由于机械开关的弹性作用，按键在开关和闭合的时候不会马上接通，在按下的时候一般会有10ms-15ms左右的延时，按键稳定闭合的时间长短由操作人员手动控制，当抬起的时候也需要经历相同时间的抖动，所以为了确保一次抖动只判断一次，需要消抖。
     
     - 消抖的方式一般由两种，一种是硬件消抖，一种是软件消抖，我们经常使用软件消抖（采用延时跳过抖动的时间段，再次判断电平的情况即可）
 
-- 独立按键电路图![](https://api2.mubu.com/v3/document_image/4733041_c96681c2-5cf7-451f-fe6e-f0574cb8ec33.png?)
+- 独立按键电路图![[独立按键电路图.png]]
 
 - 代码演示
   
-    - key.h![](https://api2.mubu.com/v3/document_image/d197857f-30f6-49eb-9b89-015875c493a5-4733041.jpg?)
+    - key.h![[Key头文件.png]]
     
-    - key.c![](https://api2.mubu.com/v3/document_image/4733041_27121e66-806a-4a49-c9c4-4a50259c0750.png?)![](https://api2.mubu.com/v3/document_image/4733041_cc1678dc-7035-4a78-a68d-dd16dfd3ce23.png?)
+    - key.c![[KeyC文件1.png]]![[KeyC文件2.png]]
     
-    - main.c![](https://api2.mubu.com/v3/document_image/4733041_181951ca-b569-4e55-a420-18ebf7b4f601.png?)
+    - main.c![[Key主函数.png]]
 
 ## 继电器
 
@@ -540,7 +538,7 @@ focused: 00:01:47
 
 - 继电器电路图
   
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_743ce7f0-2201-451b-9078-81185d447ed1.png?)
+    - 图示![[继电器电路图.png]]
     
     - 这里是NPN三极管，需要PB4高电平，才能让电路导通
     
@@ -548,13 +546,13 @@ focused: 00:01:47
     
     - 因为PB4被占用，所以需要引脚重映射，也就是引脚复用（AFIO）
       
-        - 图示![](https://api2.mubu.com/v3/document_image/724aad80-f8da-4af7-9d0a-23dce61cc8b7-4733041.jpg?)
+        - 图示![[引脚复用.png]]
         
-        - HAL库函数可以分别设置以上四种情况![](https://api2.mubu.com/v3/document_image/4733041_150ffc49-1301-4036-a14c-b38d65cb6aa2.png?)
+        - HAL库函数可以分别设置以上四种情况![[HAL引脚复用相关函数.png]]
 
 ## 声音传感器
 
-- 图示![](https://api2.mubu.com/v3/document_image/4733041_c7001144-b93a-4ef2-f33d-7873a1fb5fd9.png?)
+- 图示![[声音传感器.png]]
 
 - 简介
   
@@ -562,17 +560,15 @@ focused: 00:01:47
     
     - 声音传感器内部有一个驻极话筒，当顶部的薄膜接收到声波，开始震动的时候，会导致电容发生变化，因为电荷的大小是不变的，所以会导致电压增大，这个原理是根据Q=CU（Q电荷、C代表电容、U代表电压），当有声音的时候会导致C变小，U变大，按理说应该向外输出高电平，在设计的电路中将其反向为低电平，所以对于我们这个检测声音的外设来说，低电平就是获取到声音。
 
-- 电路图![](https://api2.mubu.com/v3/document_image/4733041_9d14f88e-2aed-40ab-f537-f79c4e70d5e3.png?)
+- 电路图![[声音传感器电路图.png]]
 
 - 如果检测到声音就让蜂鸣器响2s，没有声音就让蜂鸣器不响
 
 - 代码演示
   
-    - voice.h![](https://api2.mubu.com/v3/document_image/654ceb87-421b-4a21-917c-c5042d4e5fe4-4733041.jpg?)
-    
-    - voice.c![](https://api2.mubu.com/v3/document_image/4733041_2e614a07-afba-4620-d16c-eebfd742a314.png?)
-    
-    - main.c![](https://api2.mubu.com/v3/document_image/4733041_5ed9edde-6e8a-4bd5-8fec-28a839a34b9c.png?)
+    - voice.h![[Voice头文件.png]]
+    - voice.c![[VoiceC文件.png]]
+    - main.c![[Voice主函数.png]]
 
 ## 中断
 
@@ -601,7 +597,7 @@ focused: 00:01:47
         - 中断服务函数是放在中断向量表中，这样方便使用中断向量表来找到对应的中断服务函数
             - 中断向量表中存放的就是中断服务函数的起始地址
     
-    - NVIC作用图![](https://api2.mubu.com/v3/document_image/4733041_dc3c6fc1-7073-4d85-b561-769bf84cf1bb.png?)
+    - NVIC作用图![[NVIC作用图.png]]
 
 - 中断的优先级分配
   
@@ -651,7 +647,7 @@ focused: 00:01:47
 
 - EXTI的工作原理
   
-    - 图示![](https://api2.mubu.com/v3/document_image/4733041_a8e2b9aa-2e35-4d0e-edce-7a440e97d494.png?)
+    - 图示![[EXTI原理图.png]]
     
     - 第一部分：边沿检测
       
@@ -680,7 +676,7 @@ focused: 00:01:47
 
 - EXTI和IO口的对应关系
   
-    - EXTI和IO口的对应关系图![](https://api2.mubu.com/v3/document_image/b1f5120d-20d3-4af3-bec1-6a2a7f5bf4ab-4733041.jpg?)
+    - EXTI和IO口的对应关系图![[EXTI和IO口对应关系图.png]]
     
     - 所有GPIO口都可以输出到EXTI线上，但是注意相同的pin脚（PA0和PB0）不能同时使用一个EXTI线
     
@@ -731,8 +727,8 @@ focused: 00:01:47
 
 - 代码演示
   
-    - exti.h![](https://api2.mubu.com/v3/document_image/3b200025-91b5-4be3-b85a-ca45d73d7232-4733041.jpg?)
+    - exti.h![[Exti头文件.png]]
     
-    - exti.c![](https://api2.mubu.com/v3/document_image/4733041_556e0256-3998-4a21-8e1e-496ad6b65502.png?)
+    - exti.c![[ExtiC文件.png]]
     
-    - main.c![](https://api2.mubu.com/v3/document_image/4733041_d3ec8912-be7c-47c1-9690-972eb24b9db3.png?)
+    - main.c![[Exti主函数.png]]
