@@ -4,7 +4,7 @@ tags:
   - 笔记
 aliases:
   - java学习
-updated: 2026-06-10 16:04
+updated: 2026-06-11T17:23:00
 ---
 # 📑 目录
 
@@ -38,7 +38,7 @@ updated: 2026-06-10 16:04
   - [[java基础#(10)==封装==|封装]]
   - [[java基础#(11)继承|继承]]
   - [[java基础#(12)多态|多态]]（动态绑定机制）
-  - [[java基础#(13)接口|接口]]（接口特性 / 抽象类与接口区别）
+  - [[java基础#(13)接口|接口]]（接口特性 / 抽象类与接口区别 / 默认方法 / 静态方法）
   - [[java基础#(14)内部类|内部类]]（局部内部类 / 匿名内部类 / 成员内部类 / 静态内部类）
   - [[java基础#（15）类静态成员|类静态成员]]（类变量 / 类方法）
 - [[java基础#8.枚举|8. 枚举]]
@@ -83,6 +83,12 @@ updated: 2026-06-10 16:04
   - [[java基础#11. 线程安全集合（JUC）|线程安全集合]]（JUC）
 - [[java基础#14.IO流原理|14. IO 流原理]]
   - [[java基础#1.流的分类|流的分类]]（字节流 / 字符流 / 输入流 / 输出流）
+- [[java基础#15. 反射（Reflection）|15. 反射（Reflection）]]
+  - [[java基础#1. 反射的核心类|核心类]]
+  - [[java基础#10. 反射的应用场景|应用场景]]
+  - [[java基础#11. 反射的优缺点|优缺点]]
+- [[java基础#16. Lambda 表达式（Java 8+）|16. Lambda 表达式]]
+- [[java基础#17. Stream API（Java 8+）|17. Stream API]]
 - [[java基础#Lombok|Lombok]]（@Slf4j / @Data / @NoArgsConstructor / @AllArgsConstructor）
 - [[java基础#Spring   IOC：|Spring IOC]]（@Component / @Controller / @Service / @Repository / @Primary）
 - [[java基础#编写controller|编写 Controller]]（@RequestMapping / @GetMapping / @PostMapping / 参数提取注解）
@@ -485,13 +491,71 @@ interface A {
 - 3. 接口中不能含有静态代码块以及静态方法(用 static 修饰的方法)，而抽象类是可以有静态代码块和静态方法。
 - 4. 一个类只能继承一个抽象类，而一个类却可以实现多个接口。
 
+### 5. 接口默认方法（Java 8+）与静态方法
 
+#### 为什么引入默认方法？
+为了向后兼容：当需要给现有接口（如 `Collection`、`List`）添加新方法时，不会破坏已有的实现类。
 
-**注**：JDK 1.8 以后，接口里可以有静态方法和方法体了。
+#### 默认方法（default）
+```java
+interface Vehicle {
+    void run();  // 抽象方法（实现类必须实现）
 
-**注**：JDK 1.8 以后，接口允许包含具体实现的方法，该方法称为"默认方法"，默认方法使用 default 关键字修饰。更多内容可参考 [Java 8 默认方法](https://www.runoob.com/java/java8-default-methods.html)。
+    // 默认方法：接口中直接提供实现，实现类可选择不重写
+    default void honk() {
+        System.out.println("车辆鸣笛：嘟嘟！");
+    }
+}
 
-**注**：JDK 1.9 以后，允许将方法定义为 private，使得某些复用的代码不会把方法暴露出去。更多内容可参考 [Java 9 私有接口方法](https://www.runoob.com/java/java9-private-interface-methods.html)。
+class Car implements Vehicle {
+    @Override
+    public void run() {
+        System.out.println("汽车在行驶");
+    }
+    // honk() 可以不重写，直接继承默认实现
+}
+```
+
+#### 静态方法（static）
+```java
+interface MathUtils {
+    static int add(int a, int b) {
+        return a + b;
+    }
+}
+// 调用：MathUtils.add(1, 2);  直接通过接口名调用
+```
+
+#### 默认方法的冲突解决规则
+
+当一个类实现多个接口，且这些接口有相同签名的默认方法时，遵循以下规则：
+
+|     | 优先级 | 规则                                          |
+| :-: | :-: | :------------------------------------------ |
+|     |  1  | **类中的方法优先**：子类中显式定义的方法优先级最高                 |
+|     |  2  | **子接口优先**：如果两个接口存在继承关系，子接口的默认方法优先           |
+|     |  3  | **必须手动覆盖**：两个无关接口冲突时，实现类必须 `@Override` 解决冲突 |
+
+```java
+interface A {
+    default void hello() { System.out.println("A"); }
+}
+interface B {
+    default void hello() { System.out.println("B"); }
+}
+// 冲突：必须手动覆盖
+class MyClass implements A, B {
+    @Override
+    public void hello() {
+        A.super.hello();  // 选择调用 A 的默认方法
+    }
+}
+// 类优先于接口：父类的方法会屏蔽接口默认方法
+class Base { public void hello() { System.out.println("Base"); } }
+class Child extends Base implements A { }  // 继承 Base.hello()，A 的默认方法被忽略
+```
+
+**注**：JDK 1.9 以后，允许将接口中方法定义为 `private`，使得某些复用的代码不会把方法暴露出去。
 
 
 
@@ -937,6 +1001,49 @@ LocalDateTime parsed = LocalDateTime.parse("2026-06-10 14:30:00", dtf);
 // 日期运算（不可变，原对象不变，返回新对象）
 LocalDateTime tomorrow = now.plusDays(1);
 LocalDateTime lastMonth = now.minusMonths(1);
+```
+
+### 扩展用法
+
+```java
+// ZonedDateTime：带时区的日期时间
+ZonedDateTime zonedNow = ZonedDateTime.now();                      // 系统默认时区
+ZonedDateTime tokyoTime = ZonedDateTime.now(ZoneId.of("Asia/Tokyo"));
+
+// 时区转换
+ZonedDateTime shanghai = ZonedDateTime.now(ZoneId.of("Asia/Shanghai"));
+ZonedDateTime newYork = shanghai.withZoneSameInstant(ZoneId.of("America/New_York"));
+
+// ChronoUnit：时间单位计算
+LocalDateTime start = LocalDateTime.of(2026, 1, 1, 0, 0);
+LocalDateTime end = LocalDateTime.of(2026, 6, 11, 0, 0);
+long daysBetween = ChronoUnit.DAYS.between(start, end);     // 161 天
+long monthsBetween = ChronoUnit.MONTHS.between(start, end); // 5 个月
+
+// TemporalAdjusters：日期调整器
+LocalDate firstDay = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+LocalDate nextMonday = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+LocalDate lastDay = LocalDate.now().with(TemporalAdjusters.lastDayOfYear());
+
+// MonthDay：判断生日/节日（忽略年份）
+MonthDay birthday = MonthDay.of(6, 15);
+MonthDay today = MonthDay.from(LocalDate.now());
+boolean isBirthday = today.equals(birthday);
+
+// 旧 API（java.util.Date）与新 API 互转
+// Date → LocalDateTime
+Date date = new Date();
+LocalDateTime ldt = date.toInstant()
+    .atZone(ZoneId.systemDefault())
+    .toLocalDateTime();
+
+// LocalDateTime → Date
+LocalDateTime nowLdt = LocalDateTime.now();
+Date fromLdt = Date.from(nowLdt.atZone(ZoneId.systemDefault()).toInstant());
+
+// LocalDate → java.sql.Date
+LocalDate localDate = LocalDate.now();
+java.sql.Date sqlDate = java.sql.Date.valueOf(localDate);
 ```
 
 ## 7. Objects 类
@@ -1581,6 +1688,812 @@ map.computeIfPresent("key", (k, v) -> v + 1);  // 存在则计算
 | --- | ---- | ------------ | ------ |
 |     | 输入流  | InputStream  | Reader |
 |     | 输出流  | OutputStream | Writer |
+
+# 15. 反射（Reflection）
+
+Java 反射机制是指在**运行状态**中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意方法和属性。这种动态获取信息以及动态调用对象方法的功能称为 Java 的反射机制。
+
+## 1. 反射的核心类
+
+|     |       类       |       用途       |                          获取方式                          |
+| :-: | :-----------: | :------------: | :----------------------------------------------------: |
+|     |    `Class`    | 代表一个类，获取类的完整信息 | `类名.class` / `对象.getClass()` / `Class.forName("全限定名")` |
+|     | `Constructor` |    代表类的构造方法    |           `clazz.getDeclaredConstructors()`            |
+|     |   `Method`    |     代表类的方法     |              `clazz.getDeclaredMethods()`              |
+|     |    `Field`    |   代表类的属性/字段    |              `clazz.getDeclaredFields()`               |
+|     |  `Parameter`  |     代表方法参数     |                `method.getParameters()`                |
+|     | `Annotation`  |      代表注解      |            `clazz.getDeclaredAnnotations()`            |
+
+## 2. 获取 Class 对象的三种方式
+
+```java
+// 方式一：Class.forName() —— 最常用（编译期未知类名时）
+Class<?> clazz1 = Class.forName("com.example.User");
+
+// 方式二：类名.class —— 最安全（编译期已知类）
+Class<User> clazz2 = User.class;
+
+// 方式三：对象.getClass() —— 已有对象时
+User user = new User();
+Class<?> clazz3 = user.getClass();
+
+// 三种方式获取的是同一个 Class 对象（同一个类在 JVM 中只有一份字节码）
+System.out.println(clazz1 == clazz2);  // true
+System.out.println(clazz2 == clazz3);  // true
+```
+
+## 3. 操作构造方法（Constructor）
+
+```java
+Class<User> clazz = User.class;
+
+// 获取所有构造方法（包括 private）
+Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+
+// 获取无参构造并创建对象
+User user1 = clazz.getDeclaredConstructor().newInstance();  // 等效于 new User()
+
+// 获取有参构造并创建对象
+Constructor<User> constructor = clazz.getDeclaredConstructor(String.class, int.class);
+User user2 = constructor.newInstance("小明", 18);
+
+// 调用私有构造方法
+Constructor<User> privateCon = clazz.getDeclaredConstructor(String.class);
+privateCon.setAccessible(true);  // 暴力反射：解除 private 限制
+User user3 = privateCon.newInstance("秘密创建");
+```
+
+## 4. 操作方法（Method）
+
+```java
+Class<?> clazz = Class.forName("com.example.User");
+Object obj = clazz.getDeclaredConstructor().newInstance();
+
+// 获取所有 public 方法（含继承的）
+Method[] methods = clazz.getMethods();
+
+// 获取本类所有方法（含 private，不含继承）
+Method[] declaredMethods = clazz.getDeclaredMethods();
+
+// 调用 public 方法
+Method setName = clazz.getMethod("setName", String.class);
+setName.invoke(obj, "小明");
+
+// 调用 private 方法
+Method privateMethod = clazz.getDeclaredMethod("hiddenMethod");
+privateMethod.setAccessible(true);
+privateMethod.invoke(obj);
+
+// 调用静态方法
+Method staticMethod = clazz.getMethod("staticMethod");
+staticMethod.invoke(null);  // 静态方法，对象传 null
+
+// 获取方法返回值类型
+Class<?> returnType = setName.getReturnType();
+
+// 获取方法参数类型
+Class<?>[] paramTypes = setName.getParameterTypes();
+```
+
+## 5. 操作属性（Field）
+
+```java
+Class<?> clazz = Class.forName("com.example.User");
+Object obj = clazz.getDeclaredConstructor().newInstance();
+
+// 获取所有 public 字段（含继承的）
+Field[] fields = clazz.getFields();
+
+// 获取本类所有字段（含 private）
+Field[] declaredFields = clazz.getDeclaredFields();
+
+// 获取指定字段
+Field nameField = clazz.getDeclaredField("name");
+nameField.setAccessible(true);              // 访问 private 字段必须
+
+// 读写字段
+nameField.set(obj, "小明");                  // 设置值
+String value = (String) nameField.get(obj); // 获取值
+
+// 获取字段类型
+Class<?> fieldType = nameField.getType();    // String.class
+
+// 读写静态字段
+Field staticField = clazz.getDeclaredField("STATIC_VALUE");
+staticField.setAccessible(true);
+Object staticVal = staticField.get(null);   // 静态字段，对象传 null
+```
+
+## 6. 操作注解（Annotation）
+
+```java
+Class<?> clazz = Class.forName("com.example.User");
+
+// 获取类上的注解
+Annotation[] annotations = clazz.getDeclaredAnnotations();
+
+// 获取指定的注解
+TableName tableName = clazz.getAnnotation(TableName.class);
+String table = tableName.value();
+
+// 获取字段上的注解（ORM 框架常用）
+Field[] fields = clazz.getDeclaredFields();
+for (Field field : fields) {
+    Column column = field.getAnnotation(Column.class);
+    if (column != null) {
+        String columnName = column.name();
+        boolean isPrimaryKey = column.isPrimaryKey();
+    }
+}
+```
+
+## 7. 动态代理（反射的经典应用）
+
+```java
+// 定义接口
+interface UserService {
+    void addUser(String name);
+    void deleteUser(int id);
+}
+
+// 目标对象
+class UserServiceImpl implements UserService {
+    @Override
+    public void addUser(String name) {
+        System.out.println("添加用户：" + name);
+    }
+    @Override
+    public void deleteUser(int id) {
+        System.out.println("删除用户：" + id);
+    }
+}
+
+// 动态代理
+class LogProxy implements InvocationHandler {
+    private final Object target;
+
+    public LogProxy(Object target) {
+        this.target = target;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T createProxy(T target) {
+        return (T) Proxy.newProxyInstance(
+            target.getClass().getClassLoader(),
+            target.getClass().getInterfaces(),
+            new LogProxy(target)
+        );
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        System.out.println("[日志] 调用方法：" + method.getName() + "，参数：" + Arrays.toString(args));
+        Object result = method.invoke(target, args);  // 反射调用目标方法
+        System.out.println("[日志] 方法执行完毕：" + method.getName());
+        return result;
+    }
+}
+
+// 使用示例
+UserService userService = new UserServiceImpl();
+UserService proxy = LogProxy.createProxy(userService);
+proxy.addUser("小明");
+```
+
+## 8. 获取泛型信息
+
+```java
+// 在运行时获取泛型实参（框架中常用）
+abstract class BaseDao<T> {
+    public Class<T> getEntityClass() {
+        // 获取当前类（子类）的父类的泛型信息
+        ParameterizedType type = (ParameterizedType) this.getClass().getGenericSuperclass();
+        Type[] typeArgs = type.getActualTypeArguments();
+        return (Class<T>) typeArgs[0];  // 第一个泛型参数
+    }
+}
+
+class UserDao extends BaseDao<User> { }
+
+// 使用
+UserDao dao = new UserDao();
+Class<User> entityClass = dao.getEntityClass();  // User.class
+
+// 获取方法参数的泛型
+Method method = clazz.getMethod("findList", List.class);
+Type[] genericParamTypes = method.getGenericParameterTypes();
+for (Type type : genericParamTypes) {
+    if (type instanceof ParameterizedType) {
+        ParameterizedType pt = (ParameterizedType) type;
+        Type[] actualTypes = pt.getActualTypeArguments();
+        // 例如：List<User>  ->  获取到 User
+    }
+}
+```
+
+## 9. 操作数组（Array 类）
+
+```java
+import java.lang.reflect.Array;
+
+// 动态创建数组
+int[] intArray = (int[]) Array.newInstance(int.class, 5);
+String[] strArray = (String[]) Array.newInstance(String.class, 3);
+
+// 动态读写数组元素
+Array.set(intArray, 0, 100);
+int value = Array.getInt(intArray, 0);  // 100
+
+Array.set(strArray, 0, "Hello");
+String str = (String) Array.get(strArray, 0);
+
+// 获取数组长度和类型
+int length = Array.getLength(intArray);
+Class<?> componentType = intArray.getClass().getComponentType();  // int.class
+```
+
+## 10. 反射的应用场景
+
+|     |      场景      | 说明                   |           代表框架            |
+| :-: | :----------: | :------------------- | :-----------------------: |
+|     |   **框架核心**   | 通过配置文件或注解动态创建对象、注入依赖 |        Spring IOC         |
+|     |   **ORM**    | 根据类名/字段映射到数据库表和列     |        MyBatis、JPA        |
+|     | **序列化/反序列化** | 将对象转为 JSON/XML 或反向   |       Jackson、Gson        |
+|     |   **动态代理**   | 在运行时生成代理对象，增强方法      | Spring AOP、MyBatis Mapper |
+|     |  **IDE 工具**  | 代码补全、自动提示、查看类结构      |       IntelliJ IDEA       |
+|     |   **测试框架**   | 通过反射扫描 @Test 注解并执行方法 |       JUnit、TestNG        |
+
+## 11. 反射的优缺点
+
+|     |         优点          |                          缺点                           |
+| :-: | :-----------------: | :---------------------------------------------------: |
+|     | 运行期动态操作类 —— 提高代码灵活性 |            **性能开销**：比直接调用慢（方法调用绕过 JIT 优化）             |
+|     |      框架开发的核心技术      | **安全限制**：`setAccessible(true)` 可能被 SecurityManager 禁止 |
+|     |    破解封装性，实现通用操作     |                 **代码可读性差**：相比直接调用更复杂                  |
+|     |    泛型擦除后仍可获取原始类型    |                 **运行时错误风险**：编译期不能发现异常                 |
+
+### 性能优化建议
+
+```java
+// 不推荐：每次调用都反射获取方法
+for (int i = 0; i < 10000; i++) {
+    Method m = clazz.getMethod("doSomething");
+    m.invoke(obj);
+}
+
+// 推荐：缓存 Method 对象，避免反复查找
+Method cachedMethod = clazz.getMethod("doSomething");
+cachedMethod.setAccessible(true);
+for (int i = 0; i < 10000; i++) {
+    cachedMethod.invoke(obj);  // 复用 Method 对象
+}
+```
+
+## 12. 完整示例：模拟简易 ORM
+
+```java
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+import java.util.*;
+
+// 自定义注解
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Table {
+    String value();
+}
+
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface Column {
+    String value();
+    boolean isPrimaryKey() default false;
+}
+
+// 实体类
+@Table("t_user")
+class User {
+    @Column(value = "id", isPrimaryKey = true)
+    private Long id;
+    @Column("user_name")
+    private String name;
+    @Column("user_age")
+    private Integer age;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public Integer getAge() { return age; }
+    public void setAge(Integer age) { this.age = age; }
+}
+
+// 简易 ORM 工具
+class SimpleORM {
+    public static String generateInsertSQL(Object obj) {
+        Class<?> clazz = obj.getClass();
+        Table table = clazz.getAnnotation(Table.class);
+        if (table == null) throw new IllegalArgumentException("缺少 @Table 注解");
+
+        String tableName = table.value();
+        StringBuilder columns = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            Column col = field.getAnnotation(Column.class);
+            if (col == null) continue;
+
+            try {
+                Object value = field.get(obj);
+                if (value == null) continue;
+
+                if (columns.length() > 0) columns.append(", ");
+                if (values.length() > 0) values.append(", ");
+                columns.append(col.value());
+                values.append(value instanceof String ? "'" + value + "'" : value);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return String.format("INSERT INTO %s (%s) VALUES (%s);", tableName, columns, values);
+    }
+}
+
+// 使用
+public class ORMDemo {
+    public static void main(String[] args) {
+        User user = new User();
+        user.setId(1L);
+        user.setName("小明");
+        user.setAge(18);
+
+        String sql = SimpleORM.generateInsertSQL(user);
+        System.out.println(sql);
+        // 输出：INSERT INTO t_user (id, user_name, age) VALUES (1, '小明', 18);
+    }
+}
+```
+
+
+# 16. Lambda 表达式（Java 8+）
+
+Lambda 表达式是 Java 8 引入的重要特性，允许把函数作为方法的参数传递，使代码更加简洁。
+
+## 1. 基本语法
+
+```java
+(参数列表) -> { 方法体 }
+
+// 完整形式
+(int a, int b) -> { return a + b; }
+
+// 省略参数类型（编译器自动推断）
+(a, b) -> { return a + b; }
+
+// 只有一行代码时，可省略 {} 和 return
+(a, b) -> a + b
+
+// 单个参数可省略 ()
+a -> a * 2
+
+// 无参数
+() -> System.out.println("Hello")
+```
+
+## 2. 函数式接口（Functional Interface）
+
+**定义**：只有一个抽象方法的接口（可以有多个默认方法/静态方法）。
+使用 `@FunctionalInterface` 注解标记（可选，但推荐）。
+
+```java
+@FunctionalInterface
+interface Calculator {
+    int calculate(int a, int b);
+    // int other();  // ❌ 编译错误，只能有一个抽象方法
+
+    default void print() { }  // ✅ 默认方法不影响
+    static void info() { }    // ✅ 静态方法不影响
+}
+```
+
+### Java 8 内置的四大函数式接口
+
+| 接口 | 抽象方法 | 用途 |
+|:---:|:--------:|:----:|
+| `Consumer<T>` | `void accept(T t)` | **消费**一个参数，无返回值 |
+| `Supplier<T>` | `T get()` | **提供**一个值 |
+| `Function<T, R>` | `R apply(T t)` | **转换**一个值为另一个值 |
+| `Predicate<T>` | `boolean test(T t)` | **判断**真假，返回 boolean |
+
+```java
+// Consumer：消费
+Consumer<String> consumer = s -> System.out.println(s);
+consumer.accept("Hello");
+
+// Supplier：提供
+Supplier<Double> supplier = () -> Math.random();
+Double random = supplier.get();
+
+// Function：转换
+Function<String, Integer> function = String::length;
+Integer len = function.apply("Java");  // 4
+
+// Predicate：判断
+Predicate<Integer> predicate = n -> n > 0;
+boolean result = predicate.test(5);    // true
+```
+
+其他常用函数式接口：`BiFunction<T,U,R>`、`UnaryOperator<T>`、`BinaryOperator<T>`、`Comparator<T>`、`Runnable`
+
+## 3. 方法引用（Method Reference）—— `::`
+
+Lambda 表达式的简化写法，当 Lambda 体只是调用一个已有方法时使用。
+
+| 类型 | 语法 | 等价 Lambda |
+|:----:|:----:|:-----------:|
+| 静态方法 | `Class::staticMethod` | `(args) -> Class.staticMethod(args)` |
+| 实例方法（特定对象） | `instance::method` | `(args) -> instance.method(args)` |
+| 实例方法（任意对象） | `Class::instanceMethod` | `(obj, args) -> obj.method(args)` |
+| 构造方法 | `Class::new` | `(args) -> new Class(args)` |
+
+```java
+// 静态方法引用
+Consumer<String> c = Integer::parseInt;           // s -> Integer.parseInt(s)
+
+// 实例方法引用（特定对象）
+Supplier<Integer> s = "hello"::length;             // () -> "hello".length()
+
+// 实例方法引用（任意对象）
+Function<String, Integer> f = String::length;      // s -> s.length()
+Comparator<Integer> cmp = Integer::compareTo;      // (a, b) -> a.compareTo(b)
+
+// 构造方法引用
+Supplier<List<String>> list = ArrayList::new;      // () -> new ArrayList<>()
+Function<String, StringBuilder> sb = StringBuilder::new;
+```
+
+## 4. 变量捕获
+
+Lambda 表达式可以访问外层作用域的变量，但被捕获的变量必须是 **effectively final**（赋值后不再改变）。
+
+```java
+int factor = 10;                                     // effectively final
+// factor = 20;                                     // ❌ 不能重新赋值
+Function<Integer, Integer> multiplier = n -> n * factor;
+
+// 实例变量和静态变量没有此限制（因为它们存储在堆中）
+class Example {
+    private int instanceVar = 5;                     // 实例变量
+
+    public void test() {
+        int localVar = 10;                           // 局部变量必须 effectively final
+        Consumer<Integer> c = n -> System.out.println(n + instanceVar + localVar);
+    }
+}
+```
+
+## 5. 常见使用场景
+
+```java
+// 1. 线程
+new Thread(() -> System.out.println("Lambda 线程")).start();
+
+// 2. 排序
+List<String> list = Arrays.asList("b", "a", "c");
+list.sort((s1, s2) -> s1.compareTo(s2));
+list.sort(String::compareTo);                       // 方法引用版
+
+// 3. 集合遍历
+list.forEach(item -> System.out.println(item));
+list.forEach(System.out::println);                  // 方法引用版
+
+// 4. 自定义函数式接口
+Calculator add = (a, b) -> a + b;
+Calculator multiply = (a, b) -> a * b;
+System.out.println(add.calculate(3, 4));            // 7
+
+// 5. 集合元素处理
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+names.stream()
+    .filter(name -> name.length() > 3)
+    .map(String::toUpperCase)
+    .forEach(System.out::println);
+```
+
+
+# 17. Stream API（Java 8+）
+
+Stream 是 Java 8 引入的一套函数式编程 API，用于对集合数据进行**声明式处理**（链式操作）。
+
+**三大特点**：
+- **不存储数据**：只进行计算操作
+- **函数式编程**：操作结果通常产生一个新的 Stream
+- **惰性求值**：中间操作不会立即执行，直到遇到终端操作
+
+## 1. 操作分类
+
+```
+Stream 操作 = 中间操作（返回 Stream） + 终端操作（返回结果/副作用）
+
+中间操作：filter / map / flatMap / distinct / sorted / peek / limit / skip
+终端操作：forEach / collect / toList / reduce / count / min / max / anyMatch / allMatch / noneMatch / findFirst / findAny
+```
+
+## 2. 创建 Stream
+
+```java
+// 1. 从集合创建（最常用）
+List<String> list = Arrays.asList("a", "b", "c");
+Stream<String> stream1 = list.stream();                // 串行流
+Stream<String> stream2 = list.parallelStream();        // 并行流
+
+// 2. 从数组创建
+Stream<String> stream3 = Arrays.stream(new String[]{"a", "b", "c"});
+
+// 3. 从值创建
+Stream<String> stream4 = Stream.of("a", "b", "c");
+
+// 4. 无限流（配合 limit 使用）
+Stream<Integer> iterate = Stream.iterate(0, n -> n + 2).limit(10);
+Stream<Double> generate = Stream.generate(Math::random).limit(5);
+
+// 5. 从文件创建
+try (Stream<String> lines = Files.lines(java.nio.file.Paths.get("file.txt"))) {
+    lines.forEach(System.out::println);
+}
+```
+
+## 3. 中间操作（Intermediate）
+
+### filter —— 过滤
+```java
+List<Integer> evens = numbers.stream()
+    .filter(n -> n % 2 == 0)
+    .collect(Collectors.toList());
+```
+
+### map —— 映射/转换
+```java
+List<Integer> lengths = words.stream()
+    .map(String::length)
+    .collect(Collectors.toList());
+
+// mapToInt/mapToLong/mapToDouble 避免自动装箱开销
+int sum = words.stream().mapToInt(String::length).sum();
+```
+
+### flatMap —— 扁平化映射（将多个 Stream 合并为一个）
+```java
+List<String> sentences = Arrays.asList("Hello World", "Java Stream");
+List<String> allWords = sentences.stream()
+    .flatMap(s -> Arrays.stream(s.split(" ")))
+    .collect(Collectors.toList());
+
+List<List<Integer>> nested = Arrays.asList(Arrays.asList(1,2), Arrays.asList(3,4));
+List<Integer> flat = nested.stream()
+    .flatMap(List::stream)
+    .collect(Collectors.toList());  // [1, 2, 3, 4]
+```
+
+### distinct —— 去重
+```java
+List<Integer> distinct = numbers.stream().distinct().collect(Collectors.toList());
+```
+
+### sorted —— 排序
+```java
+numbers.stream().sorted().collect(Collectors.toList());                          // 升序
+numbers.stream().sorted((a, b) -> b - a).collect(Collectors.toList());           // 降序
+people.stream().sorted(Comparator.comparing(Person::getAge).thenComparing(Person::getName));
+```
+
+### limit & skip —— 截取（分页）
+```java
+List<Integer> first3 = numbers.stream().limit(3).collect(Collectors.toList());
+List<Integer> after3 = numbers.stream().skip(3).collect(Collectors.toList());
+
+// 分页效果：第 2 页，每页 3 条
+List<Integer> page2 = numbers.stream().skip(3).limit(3).collect(Collectors.toList());
+```
+
+### peek —— 调试/查看中间结果
+```java
+List<String> result = Stream.of("one", "two", "three")
+    .filter(s -> s.length() > 2)
+    .peek(s -> System.out.println("过滤后：" + s))
+    .map(String::toUpperCase)
+    .peek(s -> System.out.println("转换后：" + s))
+    .collect(Collectors.toList());
+```
+
+## 4. 终端操作（Terminal）
+
+### forEach —— 遍历
+```java
+stream.forEach(System.out::println);
+```
+
+### collect —— 收集（最常用）
+
+```java
+// 收集到 List
+List<String> list = stream.collect(Collectors.toList());
+// Java 16+：stream.toList()   （返回不可变 List）
+
+// 收集到 Set
+Set<String> set = stream.collect(Collectors.toSet());
+
+// 收集到特定集合类型
+ArrayList<String> arrayList = stream.collect(Collectors.toCollection(ArrayList::new));
+
+// 收集到 Map（需指定 key 和 value）
+Map<Integer, String> map = list.stream()
+    .collect(Collectors.toMap(String::length, Function.identity(), (v1, v2) -> v1));
+
+// 拼接字符串
+String joined = list.stream().collect(Collectors.joining(", ", "[", "]"));
+```
+
+### toList()（Java 16+）
+```java
+List<String> immutableList = stream.toList();  // 返回不可变 List
+```
+
+### reduce —— 归约/聚合
+```java
+Optional<Integer> sum1 = numbers.stream().reduce((a, b) -> a + b);
+Integer sum2 = numbers.stream().reduce(0, (a, b) -> a + b);
+Optional<Integer> max = numbers.stream().reduce(Integer::max);
+String concat = words.stream().reduce("", (a, b) -> a + b);
+```
+
+### count —— 计数
+```java
+long count = list.stream().filter(s -> s.startsWith("a")).count();
+```
+
+### min / max —— 最小值/最大值
+```java
+Optional<Integer> min = numbers.stream().min(Integer::compareTo);
+Optional<Person> oldest = people.stream().max(Comparator.comparing(Person::getAge));
+```
+
+### allMatch / anyMatch / noneMatch —— 匹配检查
+```java
+boolean allPositive = numbers.stream().allMatch(n -> n > 0);
+boolean anyNegative = numbers.stream().anyMatch(n -> n < 0);
+boolean noneZero = numbers.stream().noneMatch(n -> n == 0);
+```
+
+### findFirst / findAny —— 查找
+```java
+Optional<Integer> first = numbers.stream().filter(n -> n > 3).findFirst();
+// 并行流用 findAny（性能更好）
+Optional<Integer> any = numbers.parallelStream().filter(n -> n > 3).findAny();
+```
+
+## 5. 高级收集器（Collectors）
+
+### groupingBy —— 分组
+```java
+// 按年龄分组
+Map<Integer, List<Person>> byAge = people.stream()
+    .collect(Collectors.groupingBy(Person::getAge));
+
+// 分组计数
+Map<String, Long> countByCity = people.stream()
+    .collect(Collectors.groupingBy(Person::getCity, Collectors.counting()));
+
+// 分组后映射（只取姓名）
+Map<String, List<String>> namesByCity = people.stream()
+    .collect(Collectors.groupingBy(Person::getCity,
+             Collectors.mapping(Person::getName, Collectors.toList())));
+
+// 多级分组
+Map<String, Map<Integer, List<Person>>> multiGroup = people.stream()
+    .collect(Collectors.groupingBy(Person::getCity,
+             Collectors.groupingBy(Person::getAge)));
+```
+
+### partitioningBy —— 分区（二分）
+```java
+Map<Boolean, List<Person>> partition = people.stream()
+    .collect(Collectors.partitioningBy(p -> p.getAge() >= 18));
+
+List<Person> adults = partition.get(true);
+List<Person> minors = partition.get(false);
+```
+
+### summarizingInt —— 统计
+```java
+IntSummaryStatistics stats = numbers.stream()
+    .collect(Collectors.summarizingInt(Integer::intValue));
+stats.getSum();      // 总和
+stats.getAverage();  // 平均值
+stats.getMax();      // 最大值
+stats.getMin();      // 最小值
+stats.getCount();    // 计数
+```
+
+## 6. 并行流（Parallel Stream）
+
+利用多核 CPU 加速大批量数据处理。
+
+```java
+// 方式1：从集合直接创建
+list.parallelStream().filter(...).collect(...);
+
+// 方式2：串行流转并行
+list.stream().parallel().filter(...).collect(...);
+```
+
+### 适用场景
+| 适合 | 不适合 |
+|:----:|:------:|
+| 数据量大（> 10,000 条） | 数据量小 |
+| 无状态操作（filter、map） | 有共享可变状态 |
+| 元素处理相互独立 | 需要保持顺序 |
+| CPU 密集型计算 | 涉及阻塞 I/O |
+
+```java
+// 控制并行线程数
+System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "8");
+
+// 并行流示例
+int sum = numbers.parallelStream().mapToInt(Integer::intValue).sum();
+```
+
+## 7. 综合示例
+
+```java
+// 1. 提取不重复的偶数并排序
+List<Integer> result = Arrays.asList(3, 6, 2, 8, 2, 6, 1)
+    .stream()
+    .filter(n -> n % 2 == 0)
+    .distinct()
+    .sorted()
+    .collect(Collectors.toList());  // [2, 6, 8]
+
+// 2. 学生分数段分组
+Map<String, List<Student>> gradeMap = students.stream()
+    .collect(Collectors.groupingBy(s -> {
+        if (s.getScore() >= 90) return "优秀";
+        else if (s.getScore() >= 60) return "及格";
+        else return "不及格";
+    }));
+
+// 3. 部门平均薪资
+double avgSalary = employees.stream()
+    .filter(e -> e.getDepartment().equals("IT"))
+    .mapToDouble(Employee::getSalary)
+    .average()
+    .orElse(0.0);
+
+// 4. 两个列表交集
+List<Integer> list1 = Arrays.asList(1, 2, 3, 4);
+List<Integer> list2 = Arrays.asList(3, 4, 5, 6);
+List<Integer> intersection = list1.stream()
+    .filter(list2::contains)
+    .collect(Collectors.toList());  // [3, 4]
+
+// 5. 统计字符串长度分布
+Map<Integer, Long> lenDist = words.stream()
+    .collect(Collectors.groupingBy(String::length, Collectors.counting()));
+```
+
+## 8. 注意事项
+
+| 注意点 | 说明 |
+|:-----:|:----:|
+| 惰性求值 | 没有终端操作时，中间操作不会执行 |
+| 一次性 | Stream 只能使用一次，用完即关闭 |
+| 不修改原数据 | Stream 操作不影响原始数据源 |
+| 无状态 vs 有状态 | filter/map 无状态，sorted/distinct 有状态（需缓冲全部元素） |
+| 短路操作 | limit、findFirst、anyMatch 等无需处理所有元素即可返回 |
+
 
 # Lombok
 ```java
