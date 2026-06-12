@@ -83,6 +83,15 @@ updated: 2026-06-11T17:23:00
   - [[java基础#11. 线程安全集合（JUC）|线程安全集合]]（JUC）
 - [[java基础#14.IO流原理|14. IO 流原理]]
   - [[java基础#1.流的分类|流的分类]]（字节流 / 字符流 / 输入流 / 输出流）
+  - [[java基础#2. File 类（文件操作）|File 类]]
+  - [[java基础#3. 字节流（InputStream / OutputStream）|字节流]]
+  - [[java基础#4. 字符流（Reader / Writer）|字符流]]
+  - [[java基础#5. 缓冲流（Buffered）—— 性能提升|缓冲流]]
+  - [[java基础#6. 转换流（InputStreamReader / OutputStreamWriter）|转换流]]
+  - [[java基础#7. 对象流 / 序列化（ObjectInputStream / ObjectOutputStream）|序列化]]
+  - [[java基础#11. try-with-resources（自动关闭资源）|try-with-resources]]
+  - [[java基础#12. 随机访问流（RandomAccessFile）|RandomAccessFile]]
+  - [[java基础#13. NIO 基础（Java 7+ java.nio.file）|NIO]]
 - [[java基础#15. 反射（Reflection）|15. 反射（Reflection）]]
   - [[java基础#1. 反射的核心类|核心类]]
   - [[java基础#10. 反射的应用场景|应用场景]]
@@ -1676,11 +1685,12 @@ map.computeIfPresent("key", (k, v) -> v + 1);  // 存在则计算
 ```
 
 # 14.IO流原理
+以java程序为参照物：
 1. 输入流：读取外部数据到程序（内存）中
 2. 输出流：将程序（内存）中的数据输出到磁盘光盘中
 
 ## 1.流的分类
-- 操作数据单位不同：字节流（8bit），字符流（按字符，对应几个字节）
+- 操作数据单位不同：字节流（8bit），字符流（按字符，对应几个字节）==字符流会自动进行编码解码（UTF-8，GBK）==
 - 数据流的流向不同：输入流、输出流
 - 流的角色不同：节点流、处理流/包装流
 
@@ -1689,7 +1699,523 @@ map.computeIfPresent("key", (k, v) -> v + 1);  // 存在则计算
 |     | 输入流  | InputStream  | Reader |
 |     | 输出流  | OutputStream | Writer |
 
-# 15. 反射（Reflection）
+## 2. File 类（文件操作）
+
+`java.io.File` 用于表示文件和目录路径名，**不涉及文件内容读写**。
+
+```java
+File file = new File("D:/example/test.txt");   // Windows
+File dir = new File("docs");                     // 相对路径
+
+// 基本操作
+file.exists();              // 文件是否存在
+file.isFile();              // 是否是文件
+file.isDirectory();         // 是否是目录
+file.length();              // 文件大小（字节）
+file.getName();             // 文件名 test.txt
+file.getPath();             // 路径（构造时传的）
+file.getAbsolutePath();     // 绝对路径，补全为**绝对路径**，但保留 `.`（当前目录）、`..`（上级目录）、软链接 / 符号链接原样。
+file.getCanonicalPath()     //绝对路径 + 化简 . /.. + 解析软链接 + 统一大小写（Windows），路径唯一
+file.getParent();           // 父目录
+
+// 创建 & 删除
+file.createNewFile();       // 创建新文件，返回 boolean
+dir.mkdir();                // 创建单级目录
+dir.mkdirs();               // 创建多级目录（如 a/b/c）
+file.delete();              // 删除文件或空目录
+
+// 目录遍历
+File[] files = dir.listFiles();                  // 列出所有子文件/目录
+String[] names = dir.list();                     // 只返回名称
+File[] txtFiles = dir.listFiles(f -> f.getName().endsWith(".txt"));
+```
+
+**常见陷阱**：File 删除的文件不会进回收站；File 操作不涉及内容读写。
+
+## 3. 字节流（InputStream / OutputStream）
+
+适合操作**所有类型文件**（图片、视频、压缩包等）。
+
+### 3.1 FileInputStream —— 文件字节输入流
+
+```java
+// 方式一：构造器传入 File 对象
+File file = new File("input.txt");
+FileInputStream fis = new FileInputStream(file);
+
+// 方式二：构造器传入路径字符串
+FileInputStream fis = new FileInputStream("input.txt");
+
+// 读取方式一：单字节读取（不推荐，效率低）
+int data;
+while ((data = fis.read()) != -1) {     // read() 返回 int（0~255），-1 表示读完
+    System.out.print((char) data);
+}
+
+// 读取方式二：批量读取（推荐，效率高）
+byte[] buffer = new byte[1024];
+int len;
+while ((len = fis.read(buffer)) != -1) {
+    // 读取到 buffer 中，返回实际读取字节数 len
+    System.out.print(new String(buffer, 0, len));
+}
+
+fis.close();  // 必须关闭释放资源
+```
+
+### 3.2 FileOutputStream —— 文件字节输出流
+
+```java
+FileOutputStream fos = new FileOutputStream("output.txt");//new FileOutputStream("output.txt" ，true)表示追加，不加true是覆盖
+// 追加模式：new FileOutputStream("output.txt", true);
+
+String content = "Hello, Java IO!";
+fos.write(content.getBytes());              // 写入全部字节
+fos.write(content.getBytes(), 0, 5);        // 写入部分字节，第二个参数表示起始位置，最后一个参数表示一共传入字符串的长度
+
+fos.flush();  // 刷新缓冲区（字节流 flush 为空实现，字符流必须）
+fos.close();
+```
+
+### 3.3 完整拷贝文件示例
+
+```java
+public static void copyFile(String src, String dest) throws IOException {
+    try (FileInputStream fis = new FileInputStream(src);
+         FileOutputStream fos = new FileOutputStream(dest)) {
+
+        byte[] buffer = new byte[8192];  // 8KB 缓冲区
+        int len;
+        while ((len = fis.read(buffer)) != -1) {
+            fos.write(buffer, 0, len);
+        }
+    }  // 自动 close（try-with-resources）
+}
+```
+
+## 4. 字符流（Reader / Writer）
+
+适合操作**纯文本文件**（.txt、.java、.xml、.json 等），直接处理字符，自动处理编码。
+
+### 4.1 FileReader —— 文件字符输入流
+
+```java
+// 读取方式一：单字符读取
+FileReader fr = new FileReader("test.txt");
+int ch;
+while ((ch = fr.read()) != -1) {
+    System.out.print((char) ch);
+}
+fr.close();
+
+// 读取方式二：批量读取（推荐）
+FileReader fr = new FileReader("test.txt");
+char[] buffer = new char[1024];
+int len;
+while ((len = fr.read(buffer)) != -1) {
+    System.out.print(new String(buffer, 0, len));
+}
+fr.close();
+```
+
+### 4.2 FileWriter —— 文件字符输出流
+
+```java
+FileWriter fw = new FileWriter("test.txt");          // 覆盖模式
+// FileWriter fw = new FileWriter("test.txt", true); // 追加模式
+
+fw.write("Hello, 你好！");
+fw.write("\r\n");                   // 换行（Windows）
+fw.write("第二行");
+fw.flush();  // 必须 flush 或 close，否则数据可能未写入文件
+fw.close();
+```
+
+### 字节流 vs 字符流选择
+
+|     |              场景              |                     推荐                      |
+| :-: | :--------------------------: | :-----------------------------------------: |
+|     |         图片、视频、音频、压缩包         | **字节流**（FileInputStream / FileOutputStream） |
+|     | 纯文本文件（.txt、.java、.xml、.json） |      **字符流**（FileReader / FileWriter）       |
+|     |             不确定              |            **字节流**（字节流可以处理任何文件）             |
+
+### 节点流 vs 处理流
+- 节点流：从特定数据源读写数据
+- 处理流：也叫包装流，连接在已存在的流上，为程序提供更为强大的读写功能
+![[节点流vs处理流.png]]
+## 5. 缓冲流（Buffered）—— 性能提升
+
+**装饰器模式**：包装已有流，提供缓冲区，显著提升 I/O 性能。
+
+|     |        字节缓冲流         |     字符缓冲流      |
+| :-: | :------------------: | :------------: |
+|     | BufferedInputStream  | BufferedReader |
+|     | BufferedOutputStream | BufferedWriter |
+
+```java
+// 字节缓冲流（默认缓冲区 8192 字节 = 8KB）
+BufferedInputStream bis = new BufferedInputStream(new FileInputStream("input.txt"));
+BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream("output.txt"));
+
+byte[] buffer = new byte[8192];
+int len;
+while ((len = bis.read(buffer)) != -1) {
+    bos.write(buffer, 0, len);
+}
+bos.flush();  // 确保缓冲区数据全部写出
+bis.close();
+bos.close();
+
+
+// 字符缓冲流 —— 特有方法：readLine() / newLine()
+BufferedReader br = new BufferedReader(new FileReader("input.txt"));
+BufferedWriter bw = new BufferedWriter(new FileWriter("output.txt"));
+
+String line;
+while ((line = br.readLine()) != null) {     // 一次读一行（不含换行符）
+										//这里要注意，读取完会返回null
+    bw.write(line);
+    bw.newLine();                            // 跨平台换行
+}
+br.close();
+bw.close();
+```
+
+**缓冲流速度对比**（经验数据）：
+
+|     |             读取方式              |   耗时（相对）   |
+| :-: | :---------------------------: | :--------: |
+|     |      单字节 FileInputStream      | 最慢，约 100x  |
+|     | 批量 byte[8192] FileInputStream |     中等     |
+|     |   BufferedInputStream + 单字节   |     较慢     |
+|     |   BufferedInputStream + 批量    | **最快（推荐）** |
+
+## 6. 转换流（InputStreamReader / OutputStreamWriter）
+
+**作用**：字节流 ↔ 字符流的桥梁，可**指定字符编码**。
+
+```java
+// InputStreamReader：字节输入流 → 字符输入流
+FileInputStream fis = new FileInputStream("test.txt");
+InputStreamReader isr = new InputStreamReader(fis, "UTF-8");  // 指定编码
+BufferedReader br = new BufferedReader(isr);
+String line;
+while ((line = br.readLine()) != null) {
+    System.out.println(line);
+}
+br.close();
+
+// OutputStreamWriter：字符输出流 → 字节输出流
+FileOutputStream fos = new FileOutputStream("test.txt");
+OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+BufferedWriter bw = new BufferedWriter(osw);
+bw.write("你好，世界！");
+bw.close();
+
+// 常见编码读取
+new InputStreamReader(fis, "UTF-8");
+new InputStreamReader(fis, "GBK");
+new InputStreamReader(fis, StandardCharsets.UTF_8);  // Java 7+ 推荐
+```
+
+## 7. 对象流 / 序列化（ObjectInputStream / ObjectOutputStream）
+
+将 Java 对象写入文件或从文件读取 Java 对象。
+
+### 要求
+- 类必须实现 `Serializable` 接口（标记接口，无需实现方法）或者 `Externalizable`接口（该接口有方法需要实现），一般用 `Serializable` 接口
+- 类需指定 `serialVersionUID`（版本控制）
+
+```java
+// 实体类
+class User implements Serializable {
+    private static final long serialVersionUID = 1L;  // 版本号，反序列化校验用
+
+    private Long id;
+    private String name;
+    private transient String password;  // transient 修饰的字段不会被序列化
+
+    // getter/setter...
+}
+
+// 序列化：对象 → 文件
+User user = new User(1L, "小明", "123456");
+
+try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("user.dat"))) {
+    oos.writeObject(user);
+    System.out.println("对象已序列化");
+}
+
+// 反序列化：文件 → 对象
+try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("user.dat"))) {
+    User deserialized = (User) ois.readObject();
+    System.out.println(deserialized.getName());  // 小明
+    System.out.println(deserialized.getPassword());  // null（transient 字段）
+}
+```
+
+### 序列化注意事项
+- 序列化就是保存数据时也保存数据的值和类型，即`ObjectOutputStream`
+- 反序列化就是恢复数据时恢复数据的值和类型，即`ObjectInputStream
+
+1. 读取（反序列化）的顺序和保存数据（序列化）的顺序需要一致
+2. 实现序列化或者反序列化对象，需要实现 `Serializable` 接口（标记接口，无需实现方法）
+3. 序列化的类中需要添加serialVersionUID 版本号，反序列化校验用，提高版本兼容性
+4. 序列化对象时，默认将里面的所有属性进行序列化，但除了static或transient修饰的成员
+5. 序列化对象时，要求里面属性的类型也需要是实现序列化接口
+6. 序列化具有可继承性，如果某类已经实现了序列化，则他所有子类默认实现序列化
+
+|     |         要点         | 说明                                         |
+| :-: | :----------------: | :----------------------------------------- |
+|     |    `transient`     | 修饰的字段不参与序列化，反序列化后为默认值                      |
+|     | `serialVersionUID` | 若不指定，JVM 会根据类结构自动生成；类结构改变后 UID 变化，反序列化会失败  |
+|     |        静态变量        | 不属于对象，不会被序列化                               |
+|     |       父类序列化        | 父类未实现 Serializable，父类字段不会被序列化              |
+|     |       集合序列化        | `ArrayList`、`HashMap` 等集合类已实现 Serializable |
+
+
+## 8. 数据流（DataInputStream / DataOutputStream）
+
+按 Java 基本数据类型读写文件（读写跨平台）。
+
+```java
+// 写入
+try (DataOutputStream dos = new DataOutputStream(new FileOutputStream("data.bin"))) {
+    dos.writeInt(100);
+    dos.writeDouble(3.14);
+    dos.writeUTF("你好");       // UTF-8 编码的字符串
+    dos.writeBoolean(true);
+}
+
+// 读取（必须与写入顺序一致）
+try (DataInputStream dis = new DataInputStream(new FileInputStream("data.bin"))) {
+    int i = dis.readInt();        // 100
+    double d = dis.readDouble();  // 3.14
+    String s = dis.readUTF();     // 你好
+    boolean b = dis.readBoolean();// true
+}
+```
+
+## 9. 打印流（PrintStream / PrintWriter）
+
+方便地输出各种数据类型，**不会抛出 IOException**。
+
+```java
+// PrintStream：字节打印流（System.out 就是 PrintStream）
+PrintStream ps = new PrintStream(new FileOutputStream("log.txt"));
+ps.println("这是日志信息");
+ps.printf("姓名：%s，年龄：%d%n", "小明", 18);
+ps.close();
+
+// PrintWriter：字符打印流（推荐文本输出）
+PrintWriter pw = new PrintWriter(new FileWriter("log.txt"), true);  // autoFlush
+pw.println("第一行");
+pw.printf("数值：%.2f", 3.14159);
+pw.close();
+
+// 重定向标准输出
+System.setOut(new PrintStream("output.txt"));
+System.out.println("这条输出会写入文件而不是控制台");
+```
+
+## 10. 标准输入输出（System.in / System.out / System.err）
+
+```java
+// 标准输入（键盘输入）
+BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+System.out.print("请输入姓名：");
+String name = br.readLine();                       // 读取一行
+
+// 简化版：Scanner
+Scanner scanner = new Scanner(System.in);
+String name2 = scanner.nextLine();
+int age = scanner.nextInt();
+
+// 标准输出（控制台打印）
+System.out.println("普通输出");       // PrintStream
+System.err.println("错误输出");       // PrintStream，红色字体
+
+// 标准输入重定向
+System.setIn(new FileInputStream("input.txt"));
+Scanner sc = new Scanner(System.in);
+while (sc.hasNextLine()) {
+    System.out.println(sc.nextLine());
+}
+```
+
+## 11. try-with-resources（自动关闭资源）
+
+Java 7 引入，自动调用 `Closeable` 资源的 `close()` 方法，**无需手动 close**。
+
+```java
+// ❌ 传统写法（Java 7 之前）
+FileInputStream fis = null;
+try {
+    fis = new FileInputStream("test.txt");
+    // 读取操作...
+} catch (IOException e) {
+    e.printStackTrace();
+} finally {
+    if (fis != null) {
+        try { fis.close(); } catch (IOException e) { }
+    }
+}
+
+// ✅ try-with-resources（推荐，Java 7+）
+try (FileInputStream fis = new FileInputStream("test.txt");
+     FileOutputStream fos = new FileOutputStream("out.txt")) {
+
+    byte[] buffer = new byte[8192];
+    int len;
+    while ((len = fis.read(buffer)) != -1) {
+        fos.write(buffer, 0, len);
+    }
+}  // 自动调用 fis.close() 和 fos.close()，即使发生异常
+
+// 可关闭多个资源，按声明顺序的逆序关闭
+try (BufferedReader br = new BufferedReader(new FileReader("a.txt"));
+     BufferedWriter bw = new BufferedWriter(new FileWriter("b.txt"))) {
+    // 处理...
+}
+```
+
+**原理**：`try()` 中的资源必须实现 `AutoCloseable` 或 `Closeable` 接口。所有 IO 流类都实现了该接口。
+
+## 12. 随机访问流（RandomAccessFile）
+
+可直接跳转到文件的任意位置读写，**不属于 InputStream/OutputStream 体系**。
+
+```java
+// 模式：
+// "r"   — 只读
+// "rw"  — 读写
+// "rws" — 读写 + 同步写入文件+元数据
+// "rwd" — 读写 + 同步写入文件数据
+RandomAccessFile raf = new RandomAccessFile("test.txt", "rw");
+
+// 获取 & 设置文件指针位置
+long pos = raf.getFilePointer();   // 当前指针位置
+raf.seek(100);                     // 跳转到第 100 字节处
+
+// 读写（类似 DataInputStream/DataOutputStream）
+raf.writeInt(123);
+raf.writeUTF("Hello");
+raf.seek(0);                       // 回到文件开头
+int i = raf.readInt();
+
+// 获取文件长度（常用于断点续传）
+long length = raf.length();
+
+raf.close();
+
+// 断点续传示意
+long savedPosition = getSavedPosition();  // 从数据库或文件读取已传位置
+raf.seek(savedPosition);                  // 跳转到断点处继续
+byte[] buffer = new byte[4096];
+int len;
+while ((len = raf.read(buffer)) != -1) {
+    // 上传...
+    savePosition(raf.getFilePointer());   // 记录当前位置
+}
+```
+
+## 13. NIO 基础（Java 7+ java.nio.file）
+
+JDK 7 引入 `java.nio.file` 包，比 `java.io.File` 更强大、更易用。
+
+### 使用 Files / Paths（替代 File 类）
+
+```java
+Path path = Paths.get("D:", "docs", "test.txt");      // D:\docs\test.txt
+Path path2 = Paths.get("test.txt");                     // 相对路径
+
+// 文件操作
+Files.exists(path);
+Files.isRegularFile(path);
+Files.isDirectory(path);
+Files.size(path);                  // 文件大小
+Files.getLastModifiedTime(path);   // 最后修改时间
+
+// 创建 & 删除
+Files.createFile(path);                            // 创建文件
+Files.createDirectories(Paths.get("a/b/c"));       // 创建多级目录
+Files.delete(path);                                // 删除（文件不存在抛异常）
+Files.deleteIfExists(path);                        // 安全删除
+
+// 复制 & 移动
+Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+Files.move(source, target);
+
+// 文件属性
+Files.getAttribute(path, "size");
+Files.getAttribute(path, "creationTime");
+Files.getAttribute(path, "lastModifiedTime");
+
+// 读取文件所有行（适合小文件）
+List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+
+// 写入文件
+Files.write(path, "Hello, NIO!".getBytes());
+Files.write(path, lines, StandardCharsets.UTF_8);
+
+// 遍历目录
+try (Stream<Path> stream = Files.walk(Paths.get("src"))) {
+    stream.filter(p -> p.toString().endsWith(".java"))
+          .forEach(System.out::println);
+}
+```
+
+### NIO 核心概念
+
+| 概念 | 说明 |
+|:----:|:----|
+| **Channel（通道）** | 双向读写，如 `FileChannel`、`SocketChannel` |
+| **Buffer（缓冲区）** | 数据的容器，如 `ByteBuffer`、`CharBuffer` |
+| **Selector（选择器）** | 单个线程管理多个 Channel（网络编程） |
+
+```java
+// FileChannel 快速拷贝
+try (FileChannel in = FileChannel.open(Paths.get("src.zip"), StandardOpenOption.READ);
+     FileChannel out = FileChannel.open(Paths.get("dest.zip"),
+             StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+
+    in.transferTo(0, in.size(), out);  // 零拷贝，效率极高
+}
+```
+
+## 14. 常用 IO 模式总结
+
+### 装饰器模式（IO 流的设计模式）
+
+```java
+// 核心：一层套一层，增强功能
+BufferedReader br = new BufferedReader(
+    new InputStreamReader(
+        new FileInputStream("test.txt"), "UTF-8"
+    )
+);
+// FileInputStream：底层读取字节
+// InputStreamReader：字节 → 字符 + 指定编码
+// BufferedReader：提供缓冲 + readLine()
+```
+
+### IO 流速查表
+
+|     |      使用场景      | 推荐组合                                                                  |
+| :-: | :------------: | :-------------------------------------------------------------------- |
+|     | 复制二进制文件（图片/视频） | `FileInputStream` + `FileOutputStream` + `byte[8192]`                 |
+|     |  复制二进制文件（最优）   | `BufferedInputStream` + `BufferedOutputStream`                        |
+|     |   读文本文件（按行）    | `BufferedReader` + `FileReader`                                       |
+|     |     写文本文件      | `BufferedWriter` + `FileWriter`                                       |
+|     |   读文本（指定编码）    | `BufferedReader` + `InputStreamReader(UTF-8)` + `FileInputStream`     |
+|     |   Java 对象持久化   | `ObjectOutputStream` / `ObjectInputStream`                            |
+|     |   随机访问/断点续传    | `RandomAccessFile`                                                    |
+|     |      键盘输入      | `Scanner(System.in)` 或 `BufferedReader(InputStreamReader(System.in))` |
+|     |    控制台格式化输出    | `System.out`(PrintStream) / `System.err`                              |
+|     |  大文件快速处理（NIO）  | `Files.readAllLines()` / `Files.walk()` / `FileChannel`               |
+
+
+# 15. 反射（Reflection）（Reflection）
 
 Java 反射机制是指在**运行状态**中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意方法和属性。这种动态获取信息以及动态调用对象方法的功能称为 Java 的反射机制。
 

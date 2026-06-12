@@ -42,22 +42,22 @@ STM32
 id: card-mpwj1oc2
 type: task
 - [ ] 上周未完成
-- [ ] java IO
 - [ ] java 反射
 - [x] java 内部类
 - [x] java 接口
 - [x] java 异常
+- [x] java IO
 
 ### 待办清单
 id: card-mpwj3tyy
 type: task
 - [ ] 本周任务
-- [ ] java stream流
-- [ ] Stream API
-- [ ] Lambda 表达式
-- [ ] 新日期时间 API
 - [ ] 接口默认方法
 - [ ] java web
+- [x] java stream流
+- [x] Stream API
+- [x] Lambda 表达式
+- [x] 新日期时间 API
 
 ### 代办清单
 id: card-mq63h2de
