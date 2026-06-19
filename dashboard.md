@@ -38,26 +38,13 @@ STM32
 
 ## 代办事项
 
-### 待办清单
-id: card-mpwj1oc2
-type: task
-- [ ] 上周未完成
-- [ ] java 反射
-- [x] java 内部类
-- [x] java 接口
-- [x] java 异常
-- [x] java IO
-
-### 待办清单
-id: card-mpwj3tyy
+### 待办清单6/15-6/22
+id: card-mqc2j5cc
 type: task
 - [ ] 本周任务
-- [ ] 接口默认方法
-- [ ] java web
-- [x] java stream流
-- [x] Stream API
-- [x] Lambda 表达式
-- [x] 新日期时间 API
+- [ ] Mysql
+- [ ] 操作系统
+- [ ] SpringMVC
 
 ### 代办清单
 id: card-mq63h2de
@@ -72,6 +59,7 @@ type: task
 id: demo-project-1
 type: project
 [[java基础]]
+[[学习笔记/笔记/java学习/java_web.md]]
 
 ### FreeRTOS学习笔记
 id: card-mq63irzl
