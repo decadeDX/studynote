@@ -29,7 +29,7 @@ columns:
 
 ### 2026-06-09 备忘录
 id: card-mq63iyxp
-完成java异常、IO、反射
+完成java反射
 
 ### 2026-06-09 备忘录
 id: card-mq63lbop
@@ -58,27 +58,27 @@ type: task
 ### java学习
 id: demo-project-1
 type: project
-[[java基础]]
-[[学习笔记/笔记/java学习/java_web.md]]
+- [[java基础]]
+- [[学习笔记/笔记/java学习/java_web.md]]
 
 ### FreeRTOS学习笔记
 id: card-mq63irzl
 type: project
-[[学习笔记/笔记/FreeRTOS学习笔记.md]]
+- [[学习笔记/笔记/FreeRTOS学习笔记.md]]
 
 ## 需要用的知识库/目录
 
 ### AI操作命令语言指南
 id: card-mq7t0gjs
 type: project
-[[学习笔记/笔记/AI操作命令语言指南.md]]
+- [[AI操作命令语言指南]]
 
 ### java目录导航
 id: card-mq891568
 type: project
-[[学习笔记/笔记/java学习/java学习.md]]
+- [[学习笔记/笔记/java学习/java学习.md]]
 
 ### 机器视觉目录导航
 id: card-mq891fpy
 type: project
-[[学习笔记/笔记/机器视觉/机器视觉.md]]
+- [[学习笔记/笔记/机器视觉/机器视觉.md]]
