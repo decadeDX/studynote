@@ -25,6 +25,7 @@ updated: 2026-06-11T17:23:00
 - [[java基础#6.数组|6. 数组]]
   - [[java基础#三种使用方式|三种使用方式]]（动态初始化 / 静态初始化）
   - [[java基础#数组赋值机制：|数组赋值机制]]（引用赋值）
+  - [[java基础#数组常用属性和方法|数组常用属性和方法]]（length / Arrays 工具类 / 遍历方式）
 - [[java基础#7.面向对象|7. 面向对象]]
   - [[java基础#（1）对象内存分布|对象内存分布]]
   - [[java基础#（2）属性|属性]]
@@ -311,6 +312,138 @@ for (int j : n2) {
 ```
 ![引用赋值](picture/java/数组执行结果.png)
 
+## 数组常用属性和方法
+
+### 1. `length` 属性（获取数组长度）
+
+**数组是对象，有一个 `length` 属性**（不是方法，区别于 `String.length()`）。
+
+```java
+int[] arr = {10, 20, 30, 40, 50};
+System.out.println(arr.length);  // 5（无需括号）
+
+String[] names = {"Alice", "Bob"};
+System.out.println(names.length);  // 2
+
+// 遍历数组的典型用法
+for (int i = 0; i < arr.length; i++) {
+    System.out.println(arr[i]);
+}
+```
+
+> ⚠️ **注意区分**：
+> - 数组：`arr.length` —— **属性**，无括号
+> - String：`str.length()` —— **方法**，有括号
+
+### 2. `Arrays` 工具类（`java.util.Arrays`）
+
+数组本身方法很少，大部分数组操作通过 `Arrays` 工具类完成。完整见 [[java基础#3. Arrays 类（数组工具类）|§11.3 Arrays 类]]，以下是数组最常用的：
+
+|     | 方法 | 说明 | 示例 |
+| --- | ---- | ---- | ---- |
+|     | `Arrays.toString(arr)` | 数组转可读字符串 | `[1, 2, 3, 4, 5]` |
+|     | `Arrays.sort(arr)` | 升序排序（**会修改原数组**） | `[1, 2, 3, 4, 5]` |
+|     | `Arrays.binarySearch(arr, key)` | 二分查找（**必须先排序**），返回索引 | 找到返回 ≥0，找不到返回负数 |
+|     | `Arrays.copyOf(arr, newLen)` | 复制数组（可扩容/缩容） | `Arrays.copyOf(arr, 10)` |
+|     | `Arrays.copyOfRange(arr, from, to)` | 复制指定范围（左闭右开） | `Arrays.copyOfRange(arr, 1, 4)` |
+|     | `Arrays.fill(arr, value)` | 用指定值填充整个数组 | 常用于初始化 |
+|     | `Arrays.equals(arr1, arr2)` | 比较**内容**是否相等（而非引用） | 不同于 `arr1 == arr2` |
+|     | `Arrays.asList(arr)` | 数组 → 固定大小 List（**包装类数组**用） | 见下方注意事项 |
+|     | `Arrays.stream(arr)` | 数组 → Stream（支持函数式操作） | `Arrays.stream(arr).sum()` |
+
+```java
+int[] arr = {3, 1, 4, 1, 5, 9};
+
+// 转字符串
+System.out.println(Arrays.toString(arr));  // [3, 1, 4, 1, 5, 9]
+
+// 排序
+Arrays.sort(arr);
+System.out.println(Arrays.toString(arr));  // [1, 1, 3, 4, 5, 9]
+
+// 二分查找
+int idx = Arrays.binarySearch(arr, 4);     // 3
+
+// 复制（扩容）
+int[] bigger = Arrays.copyOf(arr, 10);     // [1, 1, 3, 4, 5, 9, 0, 0, 0, 0]
+
+// 填充
+int[] squares = new int[5];
+Arrays.fill(squares, 42);                 // [42, 42, 42, 42, 42]
+
+// 比较内容
+int[] a = {1, 2, 3};
+int[] b = {1, 2, 3};
+System.out.println(a == b);               // false（引用不同）
+System.out.println(Arrays.equals(a, b));  // true（内容相同）
+```
+
+### 3. 数组的遍历方式
+
+```java
+int[] arr = {10, 20, 30, 40, 50};
+
+// 方式一：普通 for（需要索引）
+for (int i = 0; i < arr.length; i++) {
+    System.out.println(arr[i]);
+}
+
+// 方式二：增强 for（无需索引，推荐）
+for (int num : arr) {
+    System.out.println(num);
+}
+
+// 方式三：Stream（Java 8+，适合函数式操作）
+Arrays.stream(arr).forEach(System.out::println);
+```
+
+### 4. 二维数组的 `length`
+
+```java
+int[][] matrix = {
+    {1, 2, 3},
+    {4, 5},
+    {6, 7, 8, 9}
+};
+
+System.out.println(matrix.length);    // 3（行数）
+System.out.println(matrix[0].length); // 3（第 0 行的列数）
+System.out.println(matrix[1].length); // 2（第 1 行的列数）
+System.out.println(matrix[2].length); // 4（第 2 行的列数）
+```
+
+### 5. 注意事项
+
+| 易错点 | 说明 | 示例 |
+|:-----:|:----|:----|
+| **`length` vs `length()`** | 数组是 `.length`（属性），String 是 `.length()`（方法） | ✅ `arr.length` ❌ `arr.length()` |
+| **引用赋值** | 数组变量赋值传的是引用（地址），不是拷贝内容 | 详见 [[java基础#数组赋值机制：\|数组赋值机制]] |
+| **`toString()` 直接调用** | 数组直接调 `toString()` 输出的是地址，需用 `Arrays.toString()` | ✅ `Arrays.toString(arr)` |
+| **`equals()` 直接调用** | 数组直接调 `equals()` 比较的是引用，需用 `Arrays.equals()` | ✅ `Arrays.equals(a, b)` |
+| **基本类型数组 → List** | `Arrays.asList(int[])` 不会拆箱为 `List<Integer>`，要逐个添加 | 用 `IntStream.of(arr).boxed().collect(...)` |
+| **`sort()` 会修改原数组** | `Arrays.sort()` 是原地排序，不返回新数组 | 如需保留原数组，先 `copyOf()` 再排序 |
+
+### 6. 数组 → Stream 快速操作
+
+```java
+int[] nums = {5, 3, 8, 1, 9, 2};
+
+// 求和
+int sum = Arrays.stream(nums).sum();          // 28
+
+// 平均值
+double avg = Arrays.stream(nums).average().orElse(0);  // 4.67
+
+// 最大/最小值
+int max = Arrays.stream(nums).max().orElse(Integer.MIN_VALUE);  // 9
+int min = Arrays.stream(nums).min().orElse(Integer.MAX_VALUE);  // 1
+
+// 过滤 + 统计（如：统计大于 3 的元素个数）
+long count = Arrays.stream(nums).filter(n -> n > 3).count();  // 4
+
+// 去重
+int[] distinct = Arrays.stream(nums).distinct().toArray();
+```
 # 7.面向对象
 1. 类是抽象的，代表一类事物，是数据类型
 2. 对象是具体的，是实例

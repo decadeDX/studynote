@@ -168,11 +168,9 @@
 
 ### 整数型
 
-- 有符号<img src="..\picture\c++\基本知识\数据类型取值范围.png" alt="img" style="zoom: 150%;" />
+- 有符号
 
 - 无符号
-
-  ![image](..\picture\c++\基本知识\无符号数据类型取值范围.png)
 
 ### 浮点型
 
@@ -339,8 +337,198 @@
 
   - 二维数组在内存中的排列顺序是按行存放，即在内存中先顺序放第一行元素，再存放第二行元素...
 
+## 数组的常用操作
 
+### 获取数组长度
 
+- C/C++ 中获取静态数组元素个数最常用的方法是 `sizeof(数组名) / sizeof(数组名[0])`
+
+  ```cpp
+  int arr[] = {10, 20, 30, 40, 50};
+  int len = sizeof(arr) / sizeof(arr[0]); // len = 5
+  ```
+
+- **原理**：`sizeof(arr)` 返回整个数组占用的总字节数，`sizeof(arr[0])` 返回单个元素占用的字节数，二者相除即得元素个数。
+
+- C++17 引入了 `std::size()`，更安全简洁：
+
+  ```cpp
+  #include <iostream>
+  int arr[] = {10, 20, 30, 40, 50};
+  int len = std::size(arr); // len = 5
+  ```
+
+- **⚠️ 特别注意**：`sizeof` 方法仅在数组定义的作用域内有效。数组作为函数参数传递时会退化为指针，`sizeof` 只能得到指针本身的大小，无法获取数组长度：
+
+  ```cpp
+  void printLength(int arr[]) {
+      // arr 已退化为指针，sizeof(arr) 是指针大小（64位系统为 8 字节）
+      int len = sizeof(arr) / sizeof(arr[0]); // ❌ 错误结果
+  }
+  ```
+
+- 解决方案：传递数组时同时传入长度参数，或改用 `std::array`/`std::vector`。
+
+### 数组的遍历
+
+- 使用下标遍历：
+
+  ```cpp
+  int arr[] = {10, 20, 30, 40, 50};
+  int len = sizeof(arr) / sizeof(arr[0]);
+  for (int i = 0; i < len; i++) {
+      cout << arr[i] << " ";
+  }
+  ```
+
+- 使用范围 for 循环（C++11引入，更简洁）：
+
+  ```cpp
+  int arr[] = {10, 20, 30, 40, 50};
+  for (int val : arr) {
+      cout << val << " ";
+  }
+  ```
+
+### 数组的填充与初始化
+
+- 定义时初始化：
+
+  ```cpp
+  int arr1[5] = {1, 2, 3, 4, 5}; // 全部初始化
+  int arr2[5] = {1, 2};          // 前两个为 1,2，其余为 0
+  int arr3[5] = {0};             // 全部初始化为 0
+  int arr4[]  = {1, 2, 3};       // 编译器自动推断长度为 3
+  ```
+
+- 使用循环手动填充：
+
+  ```cpp
+  int arr[5];
+  for (int i = 0; i < 5; i++) {
+      arr[i] = i * 10;
+  }
+  ```
+
+- 使用 `memset` 按字节设置（常用于置零）：
+
+  ```cpp
+  #include <cstring>
+  int arr[5];
+  memset(arr, 0, sizeof(arr)); // 全部置 0（仅建议用于 0 或 -1）
+  ```
+
+- 使用 `std::fill`（C++11）：
+
+  ```cpp
+  #include <algorithm>
+  int arr[5];
+  fill(arr, arr + 5, 100); // 全部设置为 100
+  ```
+
+### 数组的排序
+
+- 使用 C++ 标准库 `std::sort`（推荐）：
+
+  ```cpp
+  #include <algorithm>
+  int arr[] = {5, 3, 1, 4, 2};
+  int len = sizeof(arr) / sizeof(arr[0]);
+  sort(arr, arr + len);                    // 升序排序（默认）
+  sort(arr, arr + len, greater<int>());    // 降序排序
+  ```
+
+- 使用 C 标准库 `qsort`：
+
+  ```cpp
+  #include <cstdlib>
+  int arr[] = {5, 3, 1, 4, 2};
+  int len = sizeof(arr) / sizeof(arr[0]);
+  qsort(arr, len, sizeof(int), [](const void* a, const void* b) {
+      return *(int*)a - *(int*)b;
+  });
+  ```
+
+### 数组的查找
+
+- 线性查找：
+
+  ```cpp
+  int arr[] = {10, 20, 30, 40, 50};
+  int target = 30;
+  int len = sizeof(arr) / sizeof(arr[0]);
+  for (int i = 0; i < len; i++) {
+      if (arr[i] == target) {
+          cout << "找到，下标为：" << i << endl;
+          break;
+      }
+  }
+  ```
+
+- 使用 `std::find`：
+
+  ```cpp
+  #include <algorithm>
+  int arr[] = {10, 20, 30, 40, 50};
+  int len = sizeof(arr) / sizeof(arr[0]);
+  int* p = find(arr, arr + len, 30);
+  if (p != arr + len) {
+      cout << "找到，下标为：" << (p - arr) << endl;
+  }
+  ```
+
+### 数组的反转
+
+- 手动反转：
+
+  ```cpp
+  int arr[] = {1, 2, 3, 4, 5};
+  int len = sizeof(arr) / sizeof(arr[0]);
+  for (int i = 0; i < len / 2; i++) {
+      swap(arr[i], arr[len - 1 - i]);
+  }
+  ```
+
+- 使用 `std::reverse`：
+
+  ```cpp
+  #include <algorithm>
+  int arr[] = {1, 2, 3, 4, 5};
+  int len = sizeof(arr) / sizeof(arr[0]);
+  reverse(arr, arr + len);
+  ```
+
+### 数组的求最值
+
+- 手动求最大值和最小值：
+
+  ```cpp
+  int arr[] = {3, 7, 2, 9, 5};
+  int len = sizeof(arr) / sizeof(arr[0]);
+  int maxVal = arr[0], minVal = arr[0];
+  for (int i = 1; i < len; i++) {
+      if (arr[i] > maxVal) maxVal = arr[i];
+      if (arr[i] < minVal) minVal = arr[i];
+  }
+  ```
+
+- 使用 `std::max_element` 和 `std::min_element`：
+
+  ```cpp
+  #include <algorithm>
+  int arr[] = {3, 7, 2, 9, 5};
+  int len = sizeof(arr) / sizeof(arr[0]);
+  int* maxP = max_element(arr, arr + len);
+  int* minP = min_element(arr, arr + len);
+  cout << "最大值：" << *maxP << "，下标：" << (maxP - arr) << endl;
+  cout << "最小值：" << *minP << "，下标：" << (minP - arr) << endl;
+  ```
+
+### 注意事项
+
+- 数组下标从 **0** 开始，最后一个元素的下标为 **长度-1**。
+- C/C++ **不会**对数组下标越界进行检查，越界访问可能导致程序崩溃或数据损坏（野指针、内存踩踏等）。
+- 数组名在大多数表达式中会退化为指向首元素的指针，只有在 `sizeof`、`&` 等少数运算符作用下仍保持数组类型。
 
 
 # 五、字符串

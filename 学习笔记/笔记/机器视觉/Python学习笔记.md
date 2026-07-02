@@ -126,12 +126,47 @@ print_info(name="Alice", age=25)
 |     | `set`   | `{1, 2, 3}` | 无序、唯一  | `s.add(4)`      |
 
 ```python
-# list 常用操作
-lst = [1, 2, 3]
-lst.append(4)       # [1, 2, 3, 4]
-lst.extend([5, 6])  # [1, 2, 3, 4, 5, 6]
-lst.insert(0, 0)    # [0, 1, 2, 3, 4, 5, 6]
-lst.pop()           # 6, lst 变为 [0, 1, 2, 3, 4, 5]
+# ──── list 常用操作 ────
+
+# 增加元素
+lst = [3, 1, 4, 1, 5, 9]
+lst.append(2)       # [3, 1, 4, 1, 5, 9, 2]      末尾追加单个
+lst.extend([6, 7])  # [..., 2, 6, 7]              合并另一个列表
+lst.insert(2, 99)   # [3, 1, 99, 4, 1, 5, 9, ...] 指定位置插入
+
+# 删除元素
+lst.pop()           # 返回 7，lst 缩短            弹出末尾（可指定索引）
+lst.remove(1)       # 删除第一个值为 1 的元素        （不存在则 ValueError）
+# del lst[0]        # 删除指定索引
+# lst.clear()       # 清空所有 → []
+
+# 查找与统计
+len(lst)            # → 列表长度（元素个数）          ⭐ 最常用
+lst.index(4)        # → 第一个 4 的索引            （不存在则 ValueError）
+lst.count(1)        # → 元素出现次数
+is_in = 5 in lst    # → True / False              成员检测
+
+# 排序与反转
+lst.sort()          # 原地升序 [1, 4, 5, 6, 9, 99]
+lst.sort(reverse=True)  # 原地降序 [99, 9, 6, 5, 4, 1]
+new_lst = sorted(lst)   # 返回新列表，原列表不变     （更安全）
+lst.reverse()       # 原地反转
+list(reversed(lst)) # 返回新列表，原列表不变
+
+# 复制
+cpy = lst.copy()    # 浅拷贝（等价于 lst[:]）
+# 深拷贝需用 import copy; copy.deepcopy(lst)
+
+# 转字符串（常用于拼接）
+",".join(["a", "b", "c"])  # → "a,b,c"
+
+# 解包（unpacking）
+first, *rest = [1, 2, 3, 4]    # first=1, rest=[2,3,4]
+first, *mid, last = [1,2,3,4]  # first=1, mid=[2,3], last=4
+
+# 实战：列表扁平化（推导式 + 嵌套解包）
+matrix = [[1, 2], [3, 4], [5, 6]]
+flat = [x for row in matrix for x in row]  # [1, 2, 3, 4, 5, 6]
 
 # dict 常用操作
 d = {"a": 1, "b": 2}

@@ -4,3 +4,5 @@
 3. Java Web     ![[java_web]]
 4. java常用注解     ![[常用注解#📌 目录]]
 
+5. 八股文：
+	1. [java面试题](https://xiaolincoding.com/interview/java.html#%E6%A6%82%E5%BF%B5)

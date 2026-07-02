@@ -36,6 +36,11 @@ id: card-mq63lbop
 FreeRTOS简单了解
 STM32
 
+### 2026-07-01 备忘录
+id: card-mr1p9wek
+java学习重要程度：
+Redis+点评+消息队列，FastAPI+LangChain+LangGraph
+
 ## 代办事项
 
 ### 待办清单6/15-6/22
@@ -60,6 +65,7 @@ id: demo-project-1
 type: project
 - [[java基础]]
 - [[学习笔记/笔记/java学习/java_web.md]]
+- [[学习笔记/笔记/java学习/java学习.md]]
 
 ### FreeRTOS学习笔记
 id: card-mq63irzl
@@ -72,6 +78,11 @@ type: project
 id: card-mq7t0gjs
 type: project
 - [[AI操作命令语言指南]]
+
+### 前后端技术介绍
+id: card-mr1w0te1
+type: project
+- [[前后端技术介绍]]
 
 ### java目录导航
 id: card-mq891568
