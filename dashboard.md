@@ -70,7 +70,7 @@ type: project
 ### FreeRTOS学习笔记
 id: card-mq63irzl
 type: project
-- [[学习笔记/笔记/FreeRTOS学习笔记.md]]
+- [[FreeRTOS学习笔记]]
 
 ## 需要用的知识库/目录
 
