@@ -31,11 +31,6 @@ columns:
 id: card-mq63iyxp
 完成java反射
 
-### 2026-06-09 备忘录
-id: card-mq63lbop
-FreeRTOS简单了解
-STM32
-
 ### 2026-07-01 备忘录
 id: card-mr1p9wek
 java学习重要程度：

@@ -6,3 +6,5 @@
 
 5. 八股文：
 	1. [java面试题](https://xiaolincoding.com/interview/java.html#%E6%A6%82%E5%BF%B5)
+6. 常见坑点：
+[[面试常见坑点]]
