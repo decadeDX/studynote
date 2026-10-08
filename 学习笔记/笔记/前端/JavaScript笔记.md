@@ -2,7 +2,7 @@
 tags:
   - JavaScript
   - 前端
-updated: 2026-07-01
+updated: 2026-07-16
 ---
 
 # JavaScript 笔记
@@ -15,11 +15,11 @@ updated: 2026-07-01
 
 ### 变量声明
 
-|     | 关键字    | 作用域   | 可重复声明 | 可重新赋值 | 暂时性死区 |
-| :-: | :-------- | :------- | :--------: | :--------: | :--------: |
-|     | `var`     | 函数级   |     ✅     |     ✅     |     ❌     |
-|     | `let`     | 块级     |     ❌     |     ✅     |     ✅     |
-|     | `const`   | 块级     |     ❌     |     ❌     |     ✅     |
+|     | 关键字     | 作用域 | 可重复声明 | 可重新赋值 | 暂时性死区 |
+| :-: | :------ | :-- | :---: | :---: | :---: |
+|     | `var`   | 函数级 |   ✅   |   ✅   |   ❌   |
+|     | `let`   | 块级  |   ❌   |   ✅   |   ✅   |
+|     | `const` | 块级  |   ❌   |   ❌   |   ✅   |
 
 > **建议**：默认使用 `const`，只在需要重新赋值时用 `let`，避免使用 `var`。
 
@@ -60,19 +60,14 @@ false、0、-0、0n、""、null、undefined、NaN
 
 ## 运算符
 
-|     | 类别         | 运算符                                            |
-| :-: | :----------- | :------------------------------------------------ |
-|     | **算术**     | `+` `-` `*` `/` `%` `**` `++` `--`               |
-|     | **比较**     | `>` `<` `>=` `<=` `==` `===` `!=` `!==`          |
-|     | **逻辑**     | `&&` `\|\|` `!` `??`（空值合并）                   |
-|     | **赋值**     | `=` `+=` `-=` `*=` `/=`                          |
-|     | **可选链**   | `?.`（避免 `Cannot read property of undefined`）  |
-
-> **`==` vs `===`**：`===` 严格相等（不转换类型），`==` 会做类型转换。始终使用 `===`。
-
-> **`??` vs `\|\|`**：`??` 只在值为 `null`/`undefined` 时取右侧；`\|\|` 在值为任何假值时取右侧。
-
----
+|     | 类别      | 运算符                                          |     |
+| :-: | :------ | :------------------------------------------- | --- |
+|     | **算术**  | `+` `-` `*` `/` `%` `**` `++` `--`           |     |
+|     | **比较**  | `>` `<` `>=` `<=` `==``===``!=` `!==`        |     |
+|     | **逻辑**  | `&&` `\|\|` `!` `??`（空值合并）                   |     |
+|     | **赋值**  | `=` `+=` `-=` `*=` `/=`                      |     |
+|     | **可选链** | `?.`（避免 `Cannot read property of undefined`） |     |
+          
 
 ## 控制流与循环
 
@@ -410,16 +405,246 @@ map.forEach((v,k) => { ... });
 
 ---
 
+## DOM 操作
+
+> **DOM (Document Object Model)**：浏览器将 HTML 文档解析为树状结构，提供 JavaScript 操作页面元素的接口。
+
+### 选择元素
+
+|     | 方法                               | 说明                       |
+| :-: | :--------------------------------- | :------------------------- |
+|     | `document.querySelector(selector)` | 返回匹配的第一个元素         |
+|     | `document.querySelectorAll(sel)`   | 返回所有匹配元素（NodeList） |
+|     | `document.getElementById(id)`      | 通过 ID 获取元素             |
+|     | `document.getElementsByClassName(c)`| 通过类名获取（HTMLCollection）|
+|     | `document.getElementsByTagName(t)` | 通过标签获取（HTMLCollection）|
+
+> **`querySelector`** 是最灵活的方式，支持任意 CSS 选择器，推荐优先使用。
+
+### DOM 遍历
+
+|     | 属性/方法                             | 说明                |
+| :-: | :---------------------------------- | :----------------- |
+|     | `el.parentElement`                  | 父元素              |
+|     | `el.children`                       | 子元素集合           |
+|     | `el.firstElementChild`              | 第一个子元素          |
+|     | `el.lastElementChild`               | 最后一个子元素         |
+|     | `el.nextElementSibling`             | 下一个兄弟元素        |
+|     | `el.previousElementSibling`         | 上一个兄弟元素        |
+|     | `el.closest(selector)`              | 向上匹配最近的祖先元素   |
+
+### 操作内容与属性
+
+|     | 属性/方法                                   | 说明                |
+| :-: | :------------------------------------------ | :----------------- |
+|     | `el.textContent`                            | 获取/设置文本内容（安全） |
+|     | `el.innerHTML`                              | 获取/设置 HTML（XSS 风险）|
+|     | `el.getAttribute(name)`                     | 获取属性值           |
+|     | `el.setAttribute(name, value)`              | 设置属性值           |
+|     | `el.removeAttribute(name)`                  | 移除属性             |
+|     | `el.classList.add/remove/toggle/contains(c)` | 操作 CSS 类名        |
+|     | `el.style.property`                         | 操作行内样式          |
+|     | `el.dataset.key`                            | 访问 `data-*` 自定义属性 |
+
+```javascript
+// classList 操作
+el.classList.add('active');
+el.classList.remove('hidden');
+el.classList.toggle('dark-mode');
+el.classList.contains('active');  // true/false
+
+// data-* 属性
+// <div data-user-id="123"></div>
+el.dataset.userId;  // "123"
+```
+
+### 创建与删除元素
+
+|     | 方法                                   | 说明                |
+| :-: | :------------------------------------- | :----------------- |
+|     | `document.createElement(tag)`          | 创建元素             |
+|     | `el.append(node)`                      | 末尾添加（支持多个）    |
+|     | `el.appendChild(node)`                 | 末尾添加（单个）       |
+|     | `el.prepend(node)`                     | 开头添加             |
+|     | `el.insertBefore(new, ref)`            | 插入到 ref 前        |
+|     | `el.removeChild(node)`                 | 移除子元素           |
+|     | `el.remove()`                          | 移除自身             |
+|     | `el.replaceChild(new, old)`            | 替换子元素           |
+|     | `el.cloneNode(deep)`                   | 克隆元素（true=深克隆）|
+
+```javascript
+// 创建并插入元素
+const div = document.createElement('div');
+div.textContent = 'Hello';
+div.classList.add('card');
+document.body.append(div);
+
+// 高级插入 - 相对于某个位置
+el.insertAdjacentHTML('beforeend', '<span>text</span>');
+// 位置: 'beforebegin' / 'afterbegin' / 'beforeend' / 'afterend'
+```
+
+### 事件处理
+
+|     | 方法/属性                               | 说明                |
+| :-: | :-------------------------------------- | :----------------- |
+|     | `el.addEventListener(type, fn, opts)`    | 绑定事件             |
+|     | `el.removeEventListener(type, fn)`       | 移除事件（需同名函数）  |
+|     | `el.dispatchEvent(event)`                | 派发自定义事件        |
+|     | `event.target`                          | 实际触发事件的元素     |
+|     | `event.currentTarget`                    | 绑定事件处理器的元素   |
+|     | `event.preventDefault()`                | 阻止默认行为          |
+|     | `event.stopPropagation()`               | 阻止事件冒泡          |
+|     | `event.stopImmediatePropagation()`       | 阻止冒泡+同级其他监听  |
+
+```javascript
+// 绑定事件
+el.addEventListener('click', (e) => {
+  console.log(e.target, e.currentTarget);
+});
+
+// 事件委托：利用冒泡处理动态子元素
+parent.addEventListener('click', (e) => {
+  if (e.target.matches('.item')) {
+    console.log('item clicked:', e.target);
+  }
+});
+```
+
+### 事件流
+
+事件传播分三个阶段：
+
+|     | 阶段       | 说明                     |
+| :-: | :--------- | :----------------------- |
+|     | **捕获阶段** | 从 `window` 向下传播到目标 |
+|     | **目标阶段** | 到达事件目标元素           |
+|     | **冒泡阶段** | 从目标向上传播到 `window` |
+
+```javascript
+// 第三个参数为 true 时在捕获阶段触发（默认 false 冒泡阶段）
+el.addEventListener('click', handler, true);
+// 也可传入对象
+el.addEventListener('click', handler, { capture: true, once: true });
+```
+
+### 常用事件
+
+|     | 事件                 | 说明               |
+| :-: | :------------------- | :----------------- |
+|     | `click`              | 鼠标点击            |
+|     | `dblclick`           | 鼠标双击            |
+|     | `mouseenter/leave`   | 鼠标移入/移出（不冒泡） |
+|     | `mouseover/out`      | 鼠标移入/移出（会冒泡） |
+|     | `mousedown/up`       | 鼠标按下/释放        |
+|     | `mousemove`          | 鼠标移动            |
+|     | `keydown/keyup`      | 键盘按下/释放        |
+|     | `scroll`             | 滚动                |
+|     | `submit`             | 表单提交            |
+|     | `input`              | 输入框值变化          |
+|     | `change`             | 值改变并失去焦点       |
+|     | `focus/blur`         | 获得/失去焦点         |
+|     | `DOMContentLoaded`   | DOM 树加载完成       |
+|     | `load`               | 页面及资源完全加载     |
+
+### 自定义事件
+
+```javascript
+// 创建自定义事件
+const event = new CustomEvent('userLogin', {
+  detail: { userId: 123, name: 'Alice' },
+  bubbles: true,       // 是否冒泡
+  cancelable: true,    // 是否可取消
+});
+
+// 派发事件
+el.dispatchEvent(event);
+
+// 监听自定义事件
+el.addEventListener('userLogin', (e) => {
+  console.log(e.detail); // { userId: 123, name: 'Alice' }
+});
+```
+
+### 事件监听选项
+
+`addEventListener` 第三个参数可传入配置对象：
+
+|     | 选项        | 说明                                    |
+| :-: | :---------- | :-------------------------------------- |
+|     | `capture`   | 在捕获阶段触发（默认 `false` 冒泡阶段）     |
+|     | `once`      | 自动触发一次后移除（无需手动 `removeEventListener`）|
+|     | `passive`   | 声明不调用 `preventDefault()`，提升滚动性能 |
+|     | `signal`    | 传入 `AbortSignal`，统一取消多个监听器      |
+
+```javascript
+// once：自动一次性监听
+el.addEventListener('click', handler, { once: true });
+
+// passive：告诉浏览器不会阻止默认行为（滚动优化）
+document.addEventListener('touchstart', handler, { passive: true });
+
+// signal：通过 AbortController 统一取消
+const controller = new AbortController();
+el.addEventListener('click', handlerA, { signal: controller.signal });
+el.addEventListener('mouseenter', handlerB, { signal: controller.signal });
+window.addEventListener('resize', handlerC, { signal: controller.signal });
+
+controller.abort(); // 一次性移除所有关联的监听器
+```
+
+### 加载事件对比
+
+|     | 事件                  | 触发时机                    | 适用场景            |
+| :-: | :-------------------- | :-------------------------- | :----------------- |
+|     | `DOMContentLoaded`    | HTML 解析完毕，CSS/图片未加载 | 操作 DOM 元素       |
+|     | `load`                | 页面全部资源加载完成          | 获取图片尺寸等       |
+|     | `beforeunload`        | 页面即将卸载                 | 提示用户保存数据     |
+|     | `unload`              | 页面已卸载                   | 清理工作（慎用）     |
+
+```javascript
+// DOMContentLoaded - 最常用的 DOM 就绪事件
+document.addEventListener('DOMContentLoaded', () => {
+  // 此时可以安全操作 DOM
+  document.querySelector('#app').textContent = 'Ready';
+});
+
+// beforeunload - 提示用户未保存
+window.addEventListener('beforeunload', (e) => {
+  e.preventDefault();
+  e.returnValue = '';
+});
+```
+
+### 触摸与指针事件
+
+|     | 事件类型          | 说明                               |
+| :-: | :---------------- | :--------------------------------- |
+|     | **指针事件 (Pointer)** | 统一鼠标/触摸/笔的现代 API（推荐）    |
+|     | `pointerdown/up/move` | 指针按下/释放/移动                   |
+|     | `touchstart/move/end` | 触摸专用事件                         |
+|     | `wheel`            | 鼠标滚轮                            |
+
+```javascript
+// 指针事件 - 同时适配鼠标和触屏
+el.addEventListener('pointerdown', (e) => {
+  console.log(e.pointerType); // "mouse" | "touch" | "pen"
+  console.log(e.clientX, e.clientY);
+});
+```
+
+---
+
 ## 常见陷阱
 
-|     | 陷阱               | 说明                                           | 解决方案                 |
-| :-: | :----------------- | :--------------------------------------------- | :----------------------- |
-|     | `this` 丢失        | 回调函数中 `this` 指向改变                      | 箭头函数 / `.bind()`     |
-|     | 浮点精度           | `0.1 + 0.2 !== 0.3`                            | 使用 `toFixed()` 或库    |
-|     | `==` 类型转换      | `0 == '0'` 为 `true`                           | 始终使用 `===`           |
-|     | NaN 不等于自身     | `NaN === NaN` 为 `false`                        | 使用 `Number.isNaN()`   |
-|     | 引用类型比较       | `{} === {}` 为 `false`（比较引用而非值）         | 深比较或用 JSON 序列化  |
-|     | `sort()` 默认比较  | `[1,10,2].sort()` → `[1,10,2]`（按字符串排）    | `sort((a,b) => a - b)`  |
+|     | 陷阱            | 说明                                    | 解决方案                                                                                 |
+| :-: | :------------ | :------------------------------------ | :----------------------------------------------------------------------------------- |
+|     | `this` 丢失     | 回调函数中 `this` 指向改变                     | 箭头函数 / `.bind()`                                                                     |
+|     | 浮点精度          | `0.1 + 0.2 !== 0.3`                   | 使用 `Number.EPSILON` 比较：`Math.abs(a + b - c) < Number.EPSILON`，或使用 decimal.js 等库      |
+|     | `==` 类型转换     | `0 == '0'` 为 `true`                   | 始终使用 `===`                                                                           |
+|     | NaN 不等于自身     | `NaN === NaN` 为 `false`               | 使用 `Number.isNaN()`                                                                  |
+|     | 引用类型比较        | `{} === {}` 为 `false`（比较引用而非值）        | 使用 lodash `_.isEqual()` 或手动递归比较；`JSON.stringify()` 仅限简单结构且有缺陷（不支持 undefined/函数/循环引用） |
+|     | `sort()` 默认比较 | `[1,10,2].sort()` → `[1,10,2]`（按字符串排） | `sort((a,b) => a - b)`                                                               |
 
 ---
 

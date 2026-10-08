@@ -7,34 +7,34 @@ tags:
 aliases:
   - MySQL
   - 数据库学习
-updated: 2026-06-17
+updated: 2026-10-08
 ---
 
 # 📑 目录
 
-- [[Mysql#Part 1：MySQL 基础|Part 1：MySQL 基础]]
-  - [[Mysql#1. 数据类型|1. 数据类型]]
-  - [[Mysql#2. DDL 数据定义语言|2. DDL]]
-  - [[Mysql#3. DML 数据操作语言|3. DML]]
-  - [[Mysql#4. DQL 数据查询语言（重点）|4. DQL（重点）]]
-  - [[Mysql#5. 表设计原则（三范式）|5. 表设计原则]]
-- [[Mysql#Part 2：MySQL 进阶（开发必备）|Part 2：MySQL 进阶（开发必备）]]
-  - [[Mysql#6. 索引（Index）|6. 索引]]
-  - [[Mysql#7. 事务（Transaction）|7. 事务]]
-  - [[Mysql#8. 锁机制|8. 锁机制]]
-  - [[Mysql#9. SQL 性能优化|9. SQL 性能优化]]
-  - [[Mysql#10. 常用函数与语法|10. 常用函数]]
-- [[Mysql#Part 3：MyBatis-Plus（开发实战）|Part 3：MyBatis-Plus]]
-  - [[Mysql#11. 快速开始|11. 快速开始]]
-  - [[Mysql#12. CRUD 接口|12. CRUD 接口]]
-  - [[Mysql#13. 条件构造器 Wrapper（重点）|13. 条件构造器（重点）]]
-  - [[Mysql#14. 分页插件|14. 分页插件]]
-  - [[Mysql#15. 自动填充|15. 自动填充]]
-  - [[Mysql#16. 逻辑删除|16. 逻辑删除]]
-  - [[Mysql#17. 乐观锁|17. 乐观锁]]
-  - [[Mysql#18. 代码生成器|18. 代码生成器]]
-  - [[Mysql#19. 多数据源|19. 多数据源]]
-  - [[Mysql#20. MyBatis-Plus 高级技巧（面试/实战）|20. 高级技巧]]
+- [[#Part 1：MySQL 基础|Part 1：MySQL 基础]]
+  - [[#1. 数据类型|1. 数据类型]]
+  - [[#2. DDL（数据定义语言）|2. DDL]]
+  - [[#3. DML（数据操作语言）|3. DML]]
+  - [[#4. DQL（数据查询语言）（重点）|4. DQL（重点）]]
+  - [[#5. 表设计原则（三范式）|5. 表设计原则]]
+- [[#Part 2：MySQL 进阶（开发必备）|Part 2：MySQL 进阶（开发必备）]]
+  - [[#6. 索引（Index）|6. 索引]]
+  - [[#7. 事务（Transaction）（面试高频）|7. 事务]]
+  - [[#8. 锁机制|8. 锁机制]]
+  - [[#9. SQL 性能优化（实战重点）|9. SQL 性能优化]]
+  - [[#10. 常用函数与语法|10. 常用函数]]
+- [[#Part 3：MyBatis-Plus（开发实战）|Part 3：MyBatis-Plus]]
+  - [[#11. 快速开始|11. 快速开始]]
+  - [[#12. CRUD 接口|12. CRUD 接口]]
+  - [[#13. 条件构造器 Wrapper（重点）|13. 条件构造器（重点）]]
+  - [[#14. 分页插件|14. 分页插件]]
+  - [[#15. 自动填充|15. 自动填充]]
+  - [[#16. 逻辑删除|16. 逻辑删除]]
+  - [[#17. 乐观锁|17. 乐观锁]]
+  - [[#18. 代码生成器|18. 代码生成器]]
+  - [[#19. 多数据源|19. 多数据源]]
+  - [[#20. MyBatis-Plus 高级技巧（面试/实战）|20. 高级技巧]]
 
 ---
 
@@ -46,47 +46,93 @@ updated: 2026-06-17
 
 ## 1.1 整数类型
 
-|     |     类型     | 字节  |    范围（有符号）     |        常用场景        |
-| :-: | :--------: | :-: | :------------: | :----------------: |
-|     | `TINYINT`  |  1  |   -128 ~ 127   |  状态码、boolean（0/1）  |
-|     | `SMALLINT` |  2  | -32768 ~ 32767 |     枚举值、小范围统计      |
-|     |   `INT`    |  4  |   -21亿 ~ 21亿   | **主键、常规数字（开发最常用）** |
-|     |  `BIGINT`  |  8  |     ±922亿亿     |    雪花ID、大数据量主键     |
+| | 类型 | 存储字节 | 范围（有符号） | 常用场景 |
+| :-: | :---: | :---: | :---: | :--- |
+| | `TINYINT` | 1 | -128 ~ 127 | 状态码、boolean（0/1） |
+| | `SMALLINT` | 2 | -32768 ~ 32767 | 枚举值、小范围统计 |
+| | `INT` | 4 | -21 亿 ~ 21 亿 | **主键、常规数字** |
+| | `BIGINT` | 8 | ±922 亿亿 | 雪花 ID、大数据量主键 |
 
 > **开发建议**：主键用 `BIGINT` 或 `INT UNSIGNED`。状态字段用 `TINYINT`（0/1）。
 
-## 1.2 字符串类型
+## 1.2 小数类型（定点数与浮点数）
 
-|     |      类型      | 说明      |   最大长度   | 开发建议          |
-| :-: | :----------: | :------ | :------: | :------------ |
-|     | `VARCHAR(n)` | 可变长度字符串 | 65535 字节 | **最常用**，节省空间  |
-|     |  `CHAR(n)`   | 固定长度字符串 |  255 字符  | 定长数据（手机号、身份证） |
-|     |    `TEXT`    | 长文本     | 65535 字节 | 大段文本（文章内容）    |
-|     |  `LONGTEXT`  | 超长文本    |   4GB    | 极长内容          |
+| | 类型 | 存储字节 | 特点 | 常用场景 |
+| :-: | :---: | :---: | :--- | :--- |
+| | `FLOAT` | 4 | 单精度浮点数，约 7 位十进制有效数字 | 精度要求不高的测量数据 |
+| | `DOUBLE` | 8 | 双精度浮点数，约 15 位十进制有效数字 | 科学计算、统计分析 |
+| | `DECIMAL(M, D)` | 按 M、D 决定；`DECIMAL(10, 2)` 为 5 字节 | 定点数，十进制精确存储 | 金额、价格、税率 |
+
+```sql
+DECIMAL(10, 2)   -- 最多 10 位数，其中 2 位小数，如 12345678.90
+FLOAT            -- 单精度近似值
+DOUBLE           -- 双精度近似值
+```
+
+> [!warning] 精度注意
+> - `FLOAT` 和 `DOUBLE` 是近似值，不适合存储金额，也不应直接使用 `=` 判断小数是否完全相等。
+> - 金额字段使用 `DECIMAL`，例如 `DECIMAL(10, 2)`。
+> - `FLOAT(M, D)` 和 `DOUBLE(M, D)` 是 MySQL 非标准且已废弃的写法，新代码直接使用 `FLOAT` 或 `DOUBLE`。
+
+```sql
+-- 浮点数比较应使用允许误差，不要直接判断相等
+SELECT * FROM sensor_data
+WHERE ABS(measure_value - 0.3) < 0.000001;
+```
+
+## 1.3 字符串类型
+
+| | 类型 | 存储字节 | 最大长度 | 开发建议 |
+| :-: | :---: | :--- | :---: | :--- |
+| | `VARCHAR(n)` | `L + 1` 或 `L + 2` | `n` 表示字符数；实际受单行 65,535 字节上限约束 | **最常用**，按实际内容占用空间 |
+| | `CHAR(n)` | 通常为 `n × w` | 255 字符 | 适合长度固定的值 |
+| | `TEXT` | `L + 2` | 65,535 字节（不是字符数） | 文章正文等长文本 |
+| | `LONGTEXT` | `L + 4` | 4,294,967,295 字节（约 4 GB） | 极长文本 |
+
+> [!note] 字符串存储公式
+> `L` 是实际内容的字节数，`w` 是字符集中单个字符的最大字节数。`utf8mb4` 每个字符占 1~4 字节，因此字符数不等于字节数。
+> `VARCHAR` 的 1/2 字节是长度前缀：列最大长度不超过 255 字节时用 1 字节，否则用 2 字节。
+> 例如：`VARCHAR(100)` 最多存 100 个字符；在 `utf8mb4` 下内容最多可占 400 字节。`TEXT` 最多是 65,535 字节；若全部是 4 字节字符，最多约 16,383 个字符。
 
 > ==**VARCHAR vs CHAR 选择**：字段长度变化小用 CHAR（如性别、状态码），变化大用 VARCHAR（如用户名、地址）。==
 
-## 1.3 日期时间类型
+## 1.4 日期时间类型
 
-|     |                 类型       | 格式                  | 范围                      | 开发建议          |
-| :-: | :------------: | :------------------ | :---------------------- | :------------ |
-|     |           `DATETIME` | YYYY-MM-DD HH:MM:SS | 1000-01-01 ~ 9999-12-31 | **最常用，推荐**    |
-|     |            `TIMESTAMP`   | YYYY-MM-DD HH:MM:SS | 1970 ~ 2038             | 受时区影响，有2038问题 |
-|     |               `DATE`     | YYYY-MM-DD          | 1000-01-01 ~ 9999-12-31 | 只需要日期时使用      |
-|     |               `TIME`     | HH:MM:SS            | -838:59:59 ~ 838:59:59  | 时间跨度          |
+| | 类型 | 存储字节 | 格式 | 范围 | 开发建议 |
+| :-: | :---: | :---: | :--- | :--- | :--- |
+| | `DATETIME` | 5 + 小数秒 0~3 | YYYY-MM-DD HH:MM:SS | 1000-01-01 ~ 9999-12-31 | 业务时间常用 |
+| | `TIMESTAMP` | 4 + 小数秒 0~3 | YYYY-MM-DD HH:MM:SS | 1970 ~ 2038 | 受时区影响，注意 2038 问题 |
+| | `DATE` | 3 | YYYY-MM-DD | 1000-01-01 ~ 9999-12-31 | 只存日期 |
+| | `TIME` | 3 + 小数秒 0~3 | HH:MM:SS | -838:59:59 ~ 838:59:59 | 时间或时长 |
+
+> [!note] 小数秒的额外存储
+> `FSP` 为 0 时不增加字节；1~2 位小数秒增加 1 字节，3~4 位增加 2 字节，5~6 位增加 3 字节。
 
 > ==**开发建议**：`DATETIME` 比 `TIMESTAMP` 范围更大，推荐所有时间字段都用 `DATETIME`。==
 
-## 1.4 其他常用类型
+## 1.5 其他常用类型
+
+|     |        类型         |      存储字节       | 说明                                        |
+| :-: | :---------------: | :-------------: | :---------------------------------------- |
+|     |      `JSON`       | 可变，取决于内容和二进制元数据 | MySQL 5.7+，使用内部二进制格式；格式介绍见 [[数据交换格式]]                      |
+|     |      `ENUM`       |      1 或 2      | 单选：最多 255 个枚举值时占 1 字节，256~65,535 个时占 2 字节 |
+|     |       `SET`       |   1、2、3、4 或 8   | 多选：最多 64 个成员，按位集合存储                       |
+|     |   `TINYINT(1)`    |        1        | `(1)` 不代表 1 bit，常用作 0/1 布尔值               |
+|     | `BIGINT UNSIGNED` |        8        | 非负大整数，常用作主键                               |
 
 ```sql
-DECIMAL(10, 2)       -- 精确小数（金额/价格必用，不能使用 FLOAT/DOUBLE）
-JSON                 -- MySQL 5.7+，存储 JSON 数据
-TINYINT(1)           -- 常用作布尔值（0/1）
-BIGINT UNSIGNED      -- 自增主键（超过 INT 范围时）
+-- ENUM：只能选择一个值
+`status` ENUM('draft', 'published', 'archived')
+
+-- SET：可以同时选择多个值
+`permissions` SET('read', 'write', 'delete')
 ```
 
-> ==**金额字段必须用 `DECIMAL`**，`FLOAT`/`DOUBLE` 有精度损失！==
+> [!tip] `ENUM` 与 `SET` 的选择
+> - 单选使用 `ENUM`，多选使用 `SET`。
+> - 只适合取值少且长期稳定的字段。频繁增删选项需要修改表结构，此时应改用字典表或关联表。
+> - 不要在 `ENUM` 中定义看起来像数字的字符串，容易与内部序号混淆。
+> - ENUM可以重复，而SET不可以
 
 
 # 2. DDL（数据定义语言）
@@ -205,9 +251,27 @@ UPDATE `user` SET `deleted` = 1 WHERE `id` = 1;
 > ==**开发规范：企业项目禁止物理删除，统一用逻辑删除！**==
 
 
-# 4. DQL（数据查询语言）（==重点==）
+# 4. DQL（数据查询语言）（重点）
 
 ## 4.1 基本查询
+
+### DQL 的书写顺序与执行顺序
+
+```sql
+SELECT ...       -- 书写顺序 1 / 执行顺序 5
+FROM ...         -- 书写顺序 2 / 执行顺序 1
+WHERE ...        -- 书写顺序 3 / 执行顺序 2
+GROUP BY ...     -- 书写顺序 4 / 执行顺序 3
+HAVING ...       -- 书写顺序 5 / 执行顺序 4
+ORDER BY ...     -- 书写顺序 6 / 执行顺序 6
+LIMIT ...;       -- 书写顺序 7 / 执行顺序 7
+```
+
+- **书写顺序**：`SELECT` → `FROM` → `WHERE` → `GROUP BY` → `HAVING` → `ORDER BY` → `LIMIT`
+- **逻辑执行顺序**：`FROM` → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` → `ORDER BY` → `LIMIT`
+
+> [!tip] 为什么 `WHERE` 中通常不能使用 `SELECT` 定义的别名？
+> 因为 `WHERE` 在 `SELECT` 之前逻辑执行，此时别名还没有生成。`ORDER BY` 在 `SELECT` 之后执行，因此可以使用查询列别名。
 
 ```sql
 -- 查询指定字段
@@ -354,7 +418,163 @@ SELECT `username` FROM `user_a`
 UNION ALL
 SELECT `username` FROM `user_b`;
 ```
+==注意： union和union all都可以的情况下，优先使用union all🟡==
 
+### 实际开发：`IN` 还是 `UNION`
+
+> [!important] 先记结论
+> `IN` 本身不会导致索引失效，开发中也不是一律优先 `UNION`。先根据查询目的选择，再用 `EXPLAIN` 验证索引。
+
+| 场景 | 建议 |
+| --- | --- |
+| 同一张表、同一字段匹配多个值 | 优先 `IN` |
+| 合并多张表或多个独立查询的结果 | 优先 `UNION ALL` |
+| 合并后必须去重 | 使用 `UNION` |
+| `IN` 查询确实慢 | 先查索引和执行计划，不要直接改成 `UNION ALL` |
+
+#### `IN` 什么情况可能不走索引
+
+1. **类型不一致**：字符串索引列与数字比较，发生隐式类型转换。
+2. **索引列被计算**：对列使用函数或运算，普通索引难以直接匹配。
+3. **不符合联合索引的最左前缀**：绕过了联合索引的前导列。
+4. **命中数据太多**：优化器计算后认为全表扫描更便宜。这是主动选择扫描，不是 `IN` 让索引语法失效。
+
+```sql
+-- 可以使用 user_id 索引
+SELECT id, amount FROM orders WHERE user_id IN (101, 102, 103);
+
+-- phone 是 VARCHAR：数字常量会引发隐式转换，可能无法用索引
+SELECT id FROM user WHERE phone IN (13800138000, 13900139000);
+
+-- 正确：保持与 VARCHAR 列类型一致
+SELECT id FROM user WHERE phone IN ('13800138000', '13900139000');
+```
+
+#### 什么时候 `UNION ALL` 更合适
+
+`UNION ALL` 适合真正需要合并多个查询的场景。每个查询分支独立使用自己的索引。
+
+```sql
+SELECT id, amount FROM orders_2025 WHERE user_id = 101
+UNION ALL
+SELECT id, amount FROM orders_2026 WHERE user_id = 101;
+```
+
+> ==只是同一列的多个值时，不要为了“走索引”就机械地把 `IN` 拆成多段 `UNION ALL`。只有 `EXPLAIN` 和实际测试证明改写更快时，才进行调整。==
+
+## 4.8 JSON 字段查询
+
+假设 `product.attributes` 为 `JSON` 字段，内容如下：
+
+```json
+{
+  "brand": "Apple",
+  "price": 5999,
+  "spec": {"color": "black", "memory": 256},
+  "tags": ["phone", "5g"]
+}
+```
+
+### JSON 路径语法
+
+| | 路径 | 含义 |
+| :-: | --- | --- |
+| | `$` | 整个 JSON 文档 |
+| | `$.brand` | 对象的 `brand` 属性 |
+| | `$.spec.color` | 嵌套对象的 `color` 属性 |
+| | `$.tags[0]` | 数组第一个元素，下标从 0 开始 |
+| | `$.tags[*]` | 数组中的所有元素 |
+| | `$**.color` | 递归查找任意层级的 `color` 属性 |
+
+### 提取属性值
+
+```sql
+-- -> 返回 JSON 值：字符串会保留双引号
+SELECT `attributes`->'$.brand' AS `brand_json` FROM `product`;
+
+-- ->> 返回去除 JSON 引号后的普通文本，适合查询展示和字符串比较
+SELECT `attributes`->>'$.brand' AS `brand` FROM `product`;
+
+-- 等价写法
+SELECT JSON_EXTRACT(`attributes`, '$.spec.color') AS `color_json`
+FROM `product`;
+
+SELECT JSON_UNQUOTE(JSON_EXTRACT(`attributes`, '$.spec.color')) AS `color`
+FROM `product`;
+```
+
+> [!tip] `->` 与 `->>`
+> `attributes->'$.brand'` 返回 JSON 字符串 `"Apple"`；`attributes->>'$.brand'` 返回普通字符串 `Apple`。一般查询 JSON 对象或数组时用 `->`，字符串比较和展示时用 `->>`。
+
+### 按 JSON 属性筛选
+
+```sql
+-- 字符串精确匹配
+SELECT * FROM `product`
+WHERE `attributes`->>'$.brand' = 'Apple';
+
+-- 嵌套属性匹配
+SELECT * FROM `product`
+WHERE `attributes`->>'$.spec.color' = 'black';
+
+-- 数值比较：先转换为数值类型，避免按字符串比较
+SELECT * FROM `product`
+WHERE CAST(`attributes`->>'$.price' AS DECIMAL(10, 2)) >= 5000;
+
+-- 模糊查询
+SELECT * FROM `product`
+WHERE `attributes`->>'$.brand' LIKE 'App%';
+```
+
+### 判断路径和值是否存在
+
+```sql
+-- 指定路径是否存在：one 表示任意一个存在，all 表示全部存在
+SELECT * FROM `product`
+WHERE JSON_CONTAINS_PATH(`attributes`, 'one', '$.brand', '$.spec.color');
+
+-- JSON 对象是否包含指定键值
+SELECT * FROM `product`
+WHERE JSON_CONTAINS(`attributes`, '{"brand": "Apple"}');
+
+-- tags 数组是否包含字符串 "5g"
+SELECT * FROM `product`
+WHERE JSON_CONTAINS(`attributes`, '"5g"', '$.tags');
+
+-- 在 JSON 字符串值中搜索；找到时返回路径，找不到时返回 NULL
+SELECT * FROM `product`
+WHERE JSON_SEARCH(`attributes`, 'one', 'black') IS NOT NULL;
+```
+
+> [!warning] JSON 类型必须一致
+> JSON 中的数字 `5` 与字符串 `"5"` 是不同值。传给 `JSON_CONTAINS()` 的候选值必须是合法 JSON，因此查询 JSON 字符串时需要写成 `'"5g"'`。
+
+### 将 JSON 数组展开为多行（MySQL 8.0+）
+
+```sql
+SELECT p.`id`, jt.`tag`
+FROM `product` p
+JOIN JSON_TABLE(
+    p.`attributes`,
+    '$.tags[*]' COLUMNS (`tag` VARCHAR(50) PATH '$')
+) AS jt ON TRUE;
+```
+
+### JSON 查询索引优化
+
+直接对 JSON 路径查询通常不能使用普通索引。高频查询的属性可生成独立列，再为生成列建立索引：
+
+```sql
+ALTER TABLE `product`
+ADD COLUMN `brand` VARCHAR(50)
+    GENERATED ALWAYS AS (`attributes`->>'$.brand') STORED,
+ADD INDEX `idx_brand` (`brand`);
+
+-- 查询生成列才能直接使用 idx_brand
+SELECT * FROM `product` WHERE `brand` = 'Apple';
+```
+
+> ==**开发建议**：结构稳定且经常用于筛选、排序、关联的属性应拆成普通字段；JSON 更适合存储结构不固定、查询频率低的扩展属性。==
 
 # 5. 表设计原则（三范式）
 
@@ -391,7 +611,7 @@ CREATE TABLE `order` (
 
 ---
 
-# Part 2：MySQL 进阶（==开发必备==）
+# Part 2：MySQL 进阶（开发必备）
 
 # 6. 索引（Index）
 
@@ -540,7 +760,7 @@ SELECT `username`, `age` FROM `user` WHERE `username` = '张三';
 > ==**覆盖索引优化**：尽量让 SELECT 的字段都在索引中，避免回表。Extra 显示 `Using index` 说明是覆盖索引，性能最优。==
 
 
-# 7. 事务（Transaction）（==面试高频==）
+# 7. 事务（Transaction）（面试高频）
 
 ## 7.1 ACID 特性
 
@@ -724,7 +944,7 @@ KILL <trx_mysql_thread_id>;
 > 4. ==合理设计索引，让行锁更精确==
 
 
-# 9. SQL 性能优化（==实战重点==）
+# 9. SQL 性能优化（实战重点）
 
 ## 9.1 慢查询日志
 
@@ -810,9 +1030,52 @@ SELECT UPPER('hello'), LOWER('HELLO');          -- 大小写转换
 SELECT TRIM('  hello  ');                       -- 去除首尾空格
 SELECT REPLACE('hello world', 'world', 'mysql');-- 替换
 SELECT SUBSTRING('hello', 1, 2);                -- 截取 → he（下标从1开始！）
+SELECT LOWER                                    --转小写
+SELECT UPPER                                    --转大写
+SELECT TRIM                                     --去除字符串前后空白
+
 ```
 
-## 10.2 日期函数
+## 10.2 数字函数
+
+```sql
+SELECT ABS(-12.5);                            -- 绝对值: 12.5
+SELECT CEIL(3.14), FLOOR(3.86);               -- 向上取整: 4 / 向下取整: 3
+SELECT ROUND(123.456, 2);                     -- 四舍五入保留 2 位: 123.46
+SELECT TRUNCATE(123.456, 2);                  -- 直接截断保留 2 位: 123.45
+SELECT MOD(10, 3), 10 % 3;                    -- 求余: 1
+SELECT POW(2, 3), SQRT(9);                    -- 幂运算: 8 / 平方根: 3
+SELECT SIGN(-8), SIGN(0), SIGN(8);            -- 符号: -1 / 0 / 1
+SELECT RAND();                                 -- [0, 1) 之间的随机数
+SELECT FORMAT(1234567.8, 2);                   -- 格式化: '1,234,567.80'
+```
+
+> ==**金额处理**：存储使用 DECIMAL；ROUND 用于展示或按规则计算；FORMAT 返回字符串，不要用于继续数值运算。==
+
+## 10.3 分组（聚合）函数
+
+```sql
+-- COUNT(*) 统计所有行，COUNT(字段) 忽略 NULL
+SELECT COUNT(*) AS total_count, COUNT(email) AS email_count FROM user;
+SELECT COUNT(DISTINCT status) AS status_count FROM user;  -- 去重统计
+
+SELECT SUM(score), AVG(score), MAX(score), MIN(score) FROM exam;
+
+-- 按状态分组后求每组人数与平均年龄
+SELECT status, COUNT(*) AS user_count, AVG(age) AS avg_age
+FROM user
+GROUP BY status
+HAVING COUNT(*) > 10;
+
+-- 将每组的多个值拼接为一个字符串
+SELECT status, GROUP_CONCAT(DISTINCT username ORDER BY username SEPARATOR ', ') AS usernames
+FROM user
+GROUP BY status;
+```
+
+> ==聚合函数通常与 `GROUP BY` 配合使用；`WHERE` 在分组前过滤，`HAVING` 在聚合后过滤。`SUM`、`AVG`、`MAX`、`MIN` 都会忽略 `NULL`。==
+
+## 10.4 日期函数
 
 ```sql
 SELECT NOW();                                   -- 当前日期时间
@@ -826,7 +1089,7 @@ SELECT UNIX_TIMESTAMP(NOW());                   -- 转时间戳
 SELECT FROM_UNIXTIME(1718612345);               -- 时间戳转日期
 ```
 
-## 10.3 条件与流程控制
+## 10.5 条件与流程控制
 
 ```sql
 -- IF 函数
@@ -845,7 +1108,7 @@ FROM `user`;
 SELECT `username`, IFNULL(`email`, '未填写') AS `email` FROM `user`;
 ```
 
-## 10.4 窗口函数（MySQL 8.0+，==面试加分项==）
+## 10.6 窗口函数（MySQL 8.0+，==面试加分项==）
 
 ```sql
 -- ROW_NUMBER()：排名（无重复）
@@ -880,7 +1143,7 @@ FROM `employee`;
 
 ---
 
-# Part 3：MyBatis-Plus（==开发实战==）
+# Part 3：MyBatis-Plus（开发实战）
 
 # 11. 快速开始
 
@@ -1071,7 +1334,7 @@ long pages = page.getPages();                       // 总页数
 ```
 
 
-# 13. 条件构造器 Wrapper（==重点==）
+# 13. 条件构造器 Wrapper（重点）
 
 ## 13.1 QueryWrapper（基本条件）
 
