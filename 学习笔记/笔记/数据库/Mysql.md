@@ -7,7 +7,7 @@ tags:
 aliases:
   - MySQL
   - 数据库学习
-updated: 2026-10-08
+updated: 2026-10-10
 ---
 
 # 📑 目录
@@ -19,22 +19,23 @@ updated: 2026-10-08
   - [[#4. DQL（数据查询语言）（重点）|4. DQL（重点）]]
   - [[#5. 表设计原则（三范式）|5. 表设计原则]]
 - [[#Part 2：MySQL 进阶（开发必备）|Part 2：MySQL 进阶（开发必备）]]
-  - [[#6. 索引（Index）|6. 索引]]
-  - [[#7. 事务（Transaction）（面试高频）|7. 事务]]
-  - [[#8. 锁机制|8. 锁机制]]
-  - [[#9. SQL 性能优化（实战重点）|9. SQL 性能优化]]
-  - [[#10. 常用函数与语法|10. 常用函数]]
+  - [[#6. 视图（View）|6. 视图]]
+  - [[#7. 索引（Index）|7. 索引]]
+  - [[#8. 事务（Transaction）（面试高频）|8. 事务]]
+  - [[#9. 锁机制|9. 锁机制]]
+  - [[#10. SQL 性能优化（实战重点）|10. SQL 性能优化]]
+  - [[#11. 常用函数与语法|11. 常用函数]]
 - [[#Part 3：MyBatis-Plus（开发实战）|Part 3：MyBatis-Plus]]
-  - [[#11. 快速开始|11. 快速开始]]
-  - [[#12. CRUD 接口|12. CRUD 接口]]
-  - [[#13. 条件构造器 Wrapper（重点）|13. 条件构造器（重点）]]
-  - [[#14. 分页插件|14. 分页插件]]
-  - [[#15. 自动填充|15. 自动填充]]
-  - [[#16. 逻辑删除|16. 逻辑删除]]
-  - [[#17. 乐观锁|17. 乐观锁]]
-  - [[#18. 代码生成器|18. 代码生成器]]
-  - [[#19. 多数据源|19. 多数据源]]
-  - [[#20. MyBatis-Plus 高级技巧（面试/实战）|20. 高级技巧]]
+  - [[#12. 快速开始|12. 快速开始]]
+  - [[#13. CRUD 接口|13. CRUD 接口]]
+  - [[#14. 条件构造器 Wrapper（重点）|14. 条件构造器（重点）]]
+  - [[#15. 分页插件|15. 分页插件]]
+  - [[#16. 自动填充|16. 自动填充]]
+  - [[#17. 逻辑删除|17. 逻辑删除]]
+  - [[#18. 乐观锁|18. 乐观锁]]
+  - [[#19. 代码生成器|19. 代码生成器]]
+  - [[#20. 多数据源|20. 多数据源]]
+  - [[#21. MyBatis-Plus 高级技巧（面试/实战）|21. 高级技巧]]
 
 ---
 
@@ -201,6 +202,332 @@ ALTER TABLE `user` ADD UNIQUE INDEX `idx_phone` (`phone`);
 DROP INDEX `idx_age` ON `user`;
 ```
 
+## 2.4 约束（Constraint）
+
+约束用于限制表中允许存储的数据，保证数据的完整性和一致性。
+
+|     | 约束            | 作用              | 关键说明                         |
+| :-: | :------------ | :-------------- | :--------------------------- |
+|     | `PRIMARY KEY` | 唯一标识一行数据        | 唯一且非空；一张表只能有一个主键，但主键可由多列组成   |
+|     | `NOT NULL`    | 禁止字段存储 `NULL`   | 必填字段应显式声明                    |
+|     | `UNIQUE`      | 保证字段或字段组合不重复    | MySQL 允许唯一键中存在多个 `NULL`      |
+|     | `DEFAULT`     | 未提供字段值时使用默认值    | 默认值不能替代业务校验                  |
+|     | `CHECK`       | 校验字段或字段组合是否满足条件 | 低版本不支持，MySQL 8.0.16+ 才真正执行检查 |
+|     | `FOREIGN KEY` | 保证子表引用的数据在父表中存在 | 常用于维护表之间的引用完整性               |
+
+> [!note] `AUTO_INCREMENT` 不是约束
+> `AUTO_INCREMENT` 是列属性，用于自动生成递增值；它通常与主键配合使用，但不负责唯一性校验。
+
+### 列级约束与表级约束
+
+列级约束和表级约束的核心区别是**声明位置与作用范围**，并不是约束强度不同。
+
+| | 对比项 | 列级约束 | 表级约束 |
+| :-: | :--- | :--- | :--- |
+| | 声明位置 | 紧跟在字段定义之后 | 所有字段定义之外，作为表定义的一部分 |
+| | 作用范围 | 只能约束当前字段 | 可以约束一个或多个字段 |
+| | 联合约束 | 不支持 | 支持联合主键、联合唯一键和联合外键 |
+| | 跨字段检查 | 列级 `CHECK` 只能引用当前字段 | 表级 `CHECK` 可以同时引用多个字段 |
+| | 常用场景 | `NOT NULL`、`DEFAULT`、单列 `CHECK` | 命名约束、组合约束、外键和跨字段校验 |
+
+#### 列级约束
+
+约束直接写在字段后面，语法紧凑，适合只涉及当前字段的简单规则：
+
+```sql
+CREATE TABLE `employee_column_constraint` (
+    `id`     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `email`  VARCHAR(100)    NOT NULL UNIQUE,
+    `age`    TINYINT UNSIGNED NOT NULL DEFAULT 18 CHECK (`age` BETWEEN 18 AND 65),
+    `status` TINYINT          NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+其中：
+
+- `NOT NULL`、`DEFAULT 18` 和 `CHECK (...)` 只作用于所在字段。
+- 单列 `PRIMARY KEY`、`UNIQUE` 可以使用列级写法。
+- 列级 `CHECK` 不能引用其他字段。
+
+#### 表级约束
+
+约束单独写在字段列表中，适合显式命名、约束多个字段或表达表之间的关系：
+
+```sql
+-- 假设 department 表已经存在
+CREATE TABLE `employee_table_constraint` (
+    `id`         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `dept_id`    BIGINT UNSIGNED DEFAULT NULL,
+    `email`      VARCHAR(100)    NOT NULL,
+    `start_date` DATE            NOT NULL,
+    `end_date`   DATE            DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `uk_employee_table_email` UNIQUE (`email`),
+    CONSTRAINT `chk_employee_table_date`
+        CHECK (`end_date` IS NULL OR `end_date` >= `start_date`),
+    CONSTRAINT `fk_employee_table_department`
+        FOREIGN KEY (`dept_id`) REFERENCES `department` (`id`)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+> [!warning] 外键必须使用表级写法
+> 不要写成 `` `dept_id` BIGINT REFERENCES `department` (`id`) ``。MySQL 会解析但忽略这种行内 `REFERENCES`，不会真正创建外键。应单独使用 `FOREIGN KEY (...) REFERENCES ...`。
+
+> [!tip] 如何选择
+> - `NOT NULL`、`DEFAULT` 必须跟随字段定义，使用列级写法。
+> - 单字段的简单规则可以使用列级写法。
+> - 联合约束、外键、跨字段 `CHECK` 必须使用表级写法。
+> - 实际项目中，`PRIMARY KEY`、`UNIQUE`、`CHECK` 和 `FOREIGN KEY` 推荐使用表级写法并显式命名，便于定位报错和后续维护。
+
+### 常用约束详解
+
+#### 1. 主键约束（PRIMARY KEY）
+
+主键用于唯一标识表中的一行数据，同时具有**唯一**和**非空**两项规则。
+
+```sql
+CREATE TABLE `user_account` (
+    `id`       BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(50)     NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 联合主键：必须由两列组合后才能唯一标识一行
+CREATE TABLE `order_item` (
+    `order_id`   BIGINT UNSIGNED NOT NULL,
+    `product_id` BIGINT UNSIGNED NOT NULL,
+    `quantity`   INT             NOT NULL DEFAULT 1,
+    PRIMARY KEY (`order_id`, `product_id`)
+);
+```
+
+主键的核心规则：
+
+1. 一张表只能有一个主键，但主键可以包含多个字段。
+2. 主键字段不能为 `NULL`，也不能出现重复值。
+3. `AUTO_INCREMENT` 不是主键约束，但通常与整数主键配合使用。
+4. InnoDB 使用主键组织表数据，因此主键应尽量短、稳定且不频繁修改。
+
+> [!warning] 联合主键
+> `PRIMARY KEY (order_id, product_id)` 限制的是两列组合不能重复，单独的 `order_id` 或 `product_id` 仍然可以重复。
+
+#### 2. 唯一约束（UNIQUE）
+
+唯一约束用于保证某个字段或字段组合不重复，一张表可以定义多个唯一约束。
+
+```sql
+CREATE TABLE `user_profile` (
+    `id`       BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `email`    VARCHAR(100)    NOT NULL,
+    `phone`    VARCHAR(20)     DEFAULT NULL,
+    `tenant_id` BIGINT UNSIGNED NOT NULL,
+    `username` VARCHAR(50)     NOT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `uk_user_profile_email` UNIQUE (`email`),
+    CONSTRAINT `uk_user_profile_phone` UNIQUE (`phone`),
+    CONSTRAINT `uk_user_profile_tenant_username`
+        UNIQUE (`tenant_id`, `username`)
+);
+```
+
+> [!warning] `UNIQUE` 与 `NULL`
+> MySQL 的唯一约束允许出现多个 `NULL`。如果字段必须有值且必须唯一，应同时使用 `NOT NULL` 和 `UNIQUE`。
+
+| | 对比项 | `PRIMARY KEY` | `UNIQUE` |
+| :-: | :--- | :--- | :--- |
+| | 数量 | 每张表只能有一个 | 每张表可以有多个 |
+| | `NULL` | 不允许 | 允许多个 `NULL` |
+| | 主要用途 | 标识数据行 | 防止业务字段重复 |
+| | InnoDB 索引 | 聚簇索引 | 唯一二级索引 |
+
+#### 3. 非空约束（NOT NULL）
+
+非空约束要求字段必须有值，只能使用列级写法。
+
+```sql
+CREATE TABLE `customer` (
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(50)     NOT NULL,
+    `email` VARCHAR(100)   DEFAULT NULL
+);
+```
+
+- `NOT NULL` 只禁止 SQL 的 `NULL`，不会禁止空字符串 `''`、数字 `0` 或空 JSON。
+- 是否允许为空应根据业务语义决定，不要为了省事给所有字段设置无意义的默认值。
+- 使用 `ALTER TABLE ... MODIFY COLUMN` 添加或删除 `NOT NULL` 时，需要重新写出完整字段定义。
+
+```sql
+ALTER TABLE `customer`
+MODIFY COLUMN `email` VARCHAR(100) NOT NULL COMMENT '邮箱';
+```
+
+#### 4. 默认值约束（DEFAULT）
+
+插入数据时省略某个字段，MySQL 会使用该字段的默认值。
+
+```sql
+CREATE TABLE `task` (
+    `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `status`      TINYINT         NOT NULL DEFAULT 0,
+    `retry_count` INT             NOT NULL DEFAULT 0,
+    `create_time` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- status 使用默认值 0
+INSERT INTO `task` (`retry_count`) VALUES (1);
+```
+
+> [!note] 省略字段与显式传 `NULL` 不同
+> 省略字段时才使用 `DEFAULT`。显式插入 `NULL` 时，如果字段允许 `NULL` 就会保存 `NULL`；如果字段是 `NOT NULL`，通常会报错。默认值不能代替业务合法性校验。
+
+#### 5. 检查约束（CHECK）
+
+检查约束要求写入的数据满足指定条件，适合限制数值范围、状态集合和跨字段关系。
+
+```sql
+CREATE TABLE `coupon` (
+    `id`         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `amount`     DECIMAL(10, 2)  NOT NULL,
+    `status`     TINYINT         NOT NULL DEFAULT 0,
+    `start_time` DATETIME        NOT NULL,
+    `end_time`   DATETIME        NOT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `chk_coupon_amount` CHECK (`amount` > 0),
+    CONSTRAINT `chk_coupon_status` CHECK (`status` IN (0, 1, 2)),
+    CONSTRAINT `chk_coupon_time` CHECK (`end_time` > `start_time`)
+);
+```
+
+- `CHECK` 结果为 `FALSE` 时拒绝写入；结果为 `TRUE` 或 `UNKNOWN` 时允许写入。
+- 必填字段仍需配合 `NOT NULL`，不能只依赖 `CHECK`。
+- MySQL 8.0.16 之前会解析但忽略 `CHECK`，升级旧系统时需要特别确认版本。
+
+#### 6. 外键约束（FOREIGN KEY）
+
+外键用于保证子表中的引用值在父表中真实存在，避免产生无效关联数据。
+
+```sql
+CREATE TABLE `orders` (
+    `id`      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fk_orders_user`
+        FOREIGN KEY (`user_id`) REFERENCES `user_account` (`id`)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+```
+
+外键的核心规则：
+
+1. 子表外键字段与父表被引用字段的数据类型和有无符号属性应一致。
+2. 字符串外键还应保持字符集和排序规则一致。
+3. 外键字段和父表被引用字段必须具备可用索引；MySQL 必要时会为子表自动创建索引。
+4. `SET NULL` 要求子表外键字段允许为 `NULL`。
+5. 建议显式指定 `ON DELETE` 和 `ON UPDATE`，避免删除、更新行为含糊不清。
+
+### 创建表时添加约束
+
+```sql
+CREATE TABLE `department` (
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100)    NOT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `uk_department_name` UNIQUE (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='部门表';
+
+CREATE TABLE `employee` (
+    `id`      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `dept_id` BIGINT UNSIGNED DEFAULT NULL,
+    `email`   VARCHAR(100)    NOT NULL,
+    `age`     TINYINT UNSIGNED NOT NULL DEFAULT 18,
+    `status`  TINYINT          NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `uk_employee_email` UNIQUE (`email`),
+    CONSTRAINT `chk_employee_age` CHECK (`age` BETWEEN 18 AND 65),
+    CONSTRAINT `chk_employee_status` CHECK (`status` IN (0, 1)),
+    CONSTRAINT `fk_employee_department`
+        FOREIGN KEY (`dept_id`) REFERENCES `department` (`id`)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='员工表';
+```
+
+> [!warning] `CHECK` 与 `NULL`
+> `CHECK` 表达式结果为 `TRUE` 或 `UNKNOWN` 时都能通过，因此必填字段仍要同时声明 `NOT NULL`。MySQL 8.0.16 之前只解析 `CHECK` 语法，并不会真正执行约束。
+
+### 外键级联规则
+
+| | 规则 | 父表数据被删除或更新时的行为 |
+| :-: | :--- | :--- |
+| | `RESTRICT` | 存在关联数据时拒绝操作 |
+| | `NO ACTION` | 对 InnoDB 而言等同于 `RESTRICT` |
+| | `ON DELETE CASCADE` | 删除父表记录时，自动删除子表中的关联记录 |
+| | `ON UPDATE CASCADE` | 更新父表被引用键时，自动更新子表的外键值 |
+| | `SET NULL` | 删除或更新父表记录时，将子表外键设为 `NULL` |
+
+```sql
+-- 级联删除、级联更新
+FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+ON DELETE CASCADE
+ON UPDATE CASCADE
+
+-- 删除父表记录时，保留子表记录并将外键置空
+FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+ON DELETE SET NULL
+```
+
+> [!note] 置空条件
+> 使用 `ON DELETE SET NULL` 或 `ON UPDATE SET NULL` 时，子表外键字段不能声明为 `NOT NULL`。
+
+> ==**级联操作应谨慎使用**：`ON DELETE CASCADE` 可能一次删除大量关联数据。核心业务表通常优先使用 `RESTRICT`，由业务代码显式处理删除流程。==
+
+### 修改和删除约束
+
+```sql
+-- 删除唯一约束：UNIQUE 通过唯一索引实现，按索引名删除
+ALTER TABLE `employee` DROP INDEX `uk_employee_email`;
+
+-- 重新添加唯一约束
+ALTER TABLE `employee`
+ADD CONSTRAINT `uk_employee_email` UNIQUE (`email`);
+
+-- 删除并重新添加检查约束
+ALTER TABLE `employee` DROP CHECK `chk_employee_status`;
+
+ALTER TABLE `employee`
+ADD CONSTRAINT `chk_employee_status` CHECK (`status` IN (0, 1));
+
+-- 删除并重新添加外键约束
+ALTER TABLE `employee` DROP FOREIGN KEY `fk_employee_department`;
+
+ALTER TABLE `employee`
+ADD CONSTRAINT `fk_employee_department`
+FOREIGN KEY (`dept_id`) REFERENCES `department` (`id`)
+ON DELETE RESTRICT ON UPDATE CASCADE;
+```
+
+### 联合约束
+
+```sql
+-- 同一用户不能重复拥有同一角色
+CONSTRAINT `uk_user_role` UNIQUE (`user_id`, `role_id`)
+
+-- 联合主键：两列组合后唯一
+PRIMARY KEY (`order_id`, `product_id`)
+
+-- 联合外键：字段数量、顺序和类型必须与父表被引用键一致
+CONSTRAINT `fk_order_product`
+FOREIGN KEY (`category_id`, `product_id`)
+REFERENCES `product` (`category_id`, `id`)
+```
+
+> [!tip] 约束命名建议
+> MySQL 主键名称固定显示为 `PRIMARY`。其他约束建议使用 `uk_表名_字段`、`fk_子表_父表`、`chk_表名_规则`；显式命名便于查看报错以及使用 `ALTER TABLE` 删除约束。
+
+> ==**开发建议**：能由数据库稳定表达的底线规则应使用约束，例如非空、唯一和合法取值范围。若因分库分表等原因不使用外键，仍需为关联字段建立索引，并通过业务校验和数据巡检保证引用一致性。==
 
 # 3. DML（数据操作语言）
 
@@ -578,6 +905,153 @@ SELECT * FROM `product` WHERE `brand` = 'Apple';
 
 # 5. 表设计原则（三范式）
 
+## 常见表关系设计
+
+> [!important] 关系设计口诀
+> - 一对多：两张表，外键放在“多”的一方。
+> - 多对多：增加一张中间表，保存双方主键。
+> - 一对一：使用共享主键，或给外键添加唯一约束。
+
+### 1. 一对多
+
+一个学校可以有多个学生，但一个学生只属于一个学校，因此在学生表中保存学校外键。
+
+```mermaid
+erDiagram
+    SCHOOL ||--o{ STUDENT : "拥有"
+    SCHOOL {
+        bigint id PK
+        varchar name
+    }
+    STUDENT {
+        bigint id PK
+        varchar name
+        int age
+        bigint school_id FK
+    }
+```
+
+```sql
+CREATE TABLE `school` (
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100)    NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学校表';
+
+CREATE TABLE `student` (
+    `id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name`      VARCHAR(50)     NOT NULL,
+    `age`       TINYINT UNSIGNED DEFAULT NULL,
+    `school_id` BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_student_school_id` (`school_id`),
+    CONSTRAINT `fk_student_school`
+        FOREIGN KEY (`school_id`) REFERENCES `school` (`id`)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学生表';
+```
+
+> **关键点**：外键放在“多”的一方，即 `student.school_id`。如果学生可以暂时不属于任何学校，可将该字段改为允许 `NULL`。
+
+### 2. 多对多
+
+一个学生可以选择多门课程，一门课程也可以被多个学生选择。不能直接在任一表中保存一串 ID，应增加选课中间表。
+
+```mermaid
+erDiagram
+    STUDENT ||--o{ STUDENT_COURSE : "选课"
+    COURSE ||--o{ STUDENT_COURSE : "被选择"
+    STUDENT_COURSE {
+        bigint student_id PK, FK
+        bigint course_id PK, FK
+        decimal score
+    }
+```
+
+```sql
+CREATE TABLE `course` (
+    `id`   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100)    NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='课程表';
+
+CREATE TABLE `student_course` (
+    `student_id` BIGINT UNSIGNED NOT NULL,
+    `course_id`  BIGINT UNSIGNED NOT NULL,
+    `score`      DECIMAL(5, 2)   DEFAULT NULL,
+    PRIMARY KEY (`student_id`, `course_id`),
+    KEY `idx_student_course_course_id` (`course_id`),
+    CONSTRAINT `fk_student_course_student`
+        FOREIGN KEY (`student_id`) REFERENCES `student` (`id`)
+        ON DELETE CASCADE,
+    CONSTRAINT `fk_student_course_course`
+        FOREIGN KEY (`course_id`) REFERENCES `course` (`id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学生选课关系表';
+```
+
+> **关键点**：联合主键 `PRIMARY KEY (student_id, course_id)` 保证同一学生不会重复选择同一课程。中间表还可以保存成绩、选课时间等关系自身的属性。
+
+### 3. 一对一
+
+一个用户最多对应一份扩展资料。一对一通常用于拆分大字段、敏感字段或低频字段；如果两部分数据总是同时创建和查询，直接合并成一张表更简单。
+
+```mermaid
+erDiagram
+    APP_USER ||--o| USER_PROFILE : "拥有"
+    APP_USER {
+        bigint id PK
+        varchar username
+    }
+    USER_PROFILE {
+        bigint user_id PK,FK
+        varchar avatar
+        varchar address
+    }
+```
+
+#### 方案一：共享主键
+
+从表主键同时作为外键，天然保证每个用户最多只有一条扩展记录，适合依赖关系较强的扩展表。
+
+```sql
+-- 假设 app_user 表已存在，主键为 id
+CREATE TABLE `user_profile_shared_pk` (
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `avatar`  VARCHAR(255)    DEFAULT NULL,
+    `address` VARCHAR(255)    DEFAULT NULL,
+    PRIMARY KEY (`user_id`),
+    CONSTRAINT `fk_profile_shared_user`
+        FOREIGN KEY (`user_id`) REFERENCES `app_user` (`id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户扩展资料表';
+```
+
+#### 方案二：外键唯一
+
+从表保留自己的主键，同时为外键增加 `UNIQUE`，适合从表需要独立标识的场景。
+
+```sql
+-- 假设 app_user 表已存在，主键为 id
+CREATE TABLE `user_profile_unique_fk` (
+    `id`      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `avatar`  VARCHAR(255)    DEFAULT NULL,
+    `address` VARCHAR(255)    DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `uk_profile_unique_user` UNIQUE (`user_id`),
+    CONSTRAINT `fk_profile_unique_user`
+        FOREIGN KEY (`user_id`) REFERENCES `app_user` (`id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户扩展资料表';
+```
+
+| | 关系 | 推荐设计 | 数据库保证方式 |
+| :-: | :--- | :--- | :--- |
+| | 一对多 | “多”的表保存外键 | 外键字段可重复 |
+| | 多对多 | 建立中间关系表 | 两个外键 + 联合主键或联合唯一约束 |
+| | 一对一 | 共享主键或唯一外键 | `PRIMARY KEY + FOREIGN KEY` 或 `UNIQUE + FOREIGN KEY` |
+
 ## 三范式速记
 
 |     |           范式 | 核心要求 | 通俗解释 | 反例 |
@@ -585,8 +1059,7 @@ SELECT * FROM `product` WHERE `brand` = 'Apple';
 |     |           **1NF** | 字段不可再分 | 每个字段存一个值 | "爱好"字段存"篮球,游泳" |
 |     |           **2NF** | 非主键字段完全依赖于主键 | 联合主键时，不要只依赖部分主键 | (学生,课程) → 成绩合理，但→ 学生姓名不合理 |
 |     |           **3NF** | 非主键字段不传递依赖于主键 | 不要有A→B→C的传递依赖 | 订单表中有"用户所属部门"（应从用户表关联） |
-
-> ==**实际开发不要死守三范式**：适当冗余字段可以避免 JOIN 查询，提高性能（空间换时间）。==
+ ==**实际开发不要死守三范式**：适当冗余字段可以避免 JOIN 查询，提高性能（空间换时间）。==
 
 ## 字段设计规范
 
@@ -606,16 +1079,47 @@ CREATE TABLE `order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单表';
 ```
 
-> ==**冗余字段技巧**：在 `order` 表中冗余 `user_name`，查询订单时不用 JOIN `user` 表，性能提升明显。适合数据不频繁变化的字段。==
+**冗余字段技巧**：在 `order` 表中冗余 `user_name`，查询订单时不用 JOIN `user` 表，性能提升明显。适合数据不频繁变化的字段。
 
 
 ---
 
 # Part 2：MySQL 进阶（开发必备）
 
-# 6. 索引（Index）
+# 6. 视图（View）
 
-## 6.1 索引类型
+视图是由查询语句定义的**虚拟表**，通常不单独存储数据。查询视图时，MySQL 会从基础表中读取最新数据。它适合用来简化复杂查询，或只向使用者暴露部分字段和数据。
+
+```sql
+-- 创建视图：只展示正常用户的常用字段
+CREATE VIEW `active_user_view` AS
+SELECT `id`, `username`, `email`
+FROM `user`
+WHERE `status` = 1;
+
+-- 像查询普通表一样查询视图
+SELECT * FROM `active_user_view`;
+
+-- 查看视图定义
+SHOW CREATE VIEW `active_user_view`;
+
+-- 删除视图，不会删除基础表中的数据
+DROP VIEW `active_user_view`;
+```
+
+> [!note] 使用注意
+> 视图依赖基础表，基础表结构变更可能导致视图失效；包含聚合、分组、去重等复杂查询的视图通常不可直接更新。
+
+
+## 6.1 视图的作用
+
+1. **降低维护成本**：将复杂且需要重复使用的 SQL 封装为视图。业务查询只需访问视图，SQL 发生变化时通常只需修改视图定义，不必逐一修改程序中的查询语句。
+2. **提升安全性**：通过视图隐藏密码、身份证号等敏感字段，只向特定用户或部门暴露其需要的数据，限制数据访问范围。
+
+
+# 7. 索引（Index）
+
+## 7.1 索引类型
 
 |     |           索引类型 | 特点 | 使用场景 |
 | :-: |:--------:|:----|:--------|
@@ -625,7 +1129,7 @@ CREATE TABLE `order` (
 |     |           **聚簇索引** | InnoDB 主键索引，叶子节点存整行数据 | 主键（自动创建） |
 |     |           **二级索引** | 非主键索引，叶子节点存主键值 | 普通索引 |
 
-## 6.2 B+Tree 索引原理（==面试高频==）
+## 7.2 B+Tree 索引原理（==面试高频==）
 
 ```
 MySQL InnoDB B+Tree 特点：
@@ -642,7 +1146,7 @@ MySQL InnoDB B+Tree 特点：
 
 > ==**B+Tree vs B-Tree 核心区别**：B+Tree 非叶子节点不存数据，能存放更多索引，树更矮，查询更稳定。==
 
-## 6.3 索引操作
+## 7.3 索引操作
 
 ```sql
 -- 单列索引
@@ -664,7 +1168,7 @@ DROP INDEX `idx_username` ON `user`;
 EXPLAIN SELECT * FROM `user` WHERE `username` = '张三';
 ```
 
-## 6.4 联合索引最左前缀原则
+## 7.4 联合索引最左前缀原则
 
 ```sql
 -- 索引：(username, age, status)
@@ -683,7 +1187,7 @@ WHERE `username` = '张三' AND `status` = 1         -- 跳过了第二列
 
 > ==**联合索引核心：最左前缀原则**——查询条件必须从索引最左列开始，跳过任何一列，后面的列就走不了索引。==
 
-## 6.5 索引失效场景（==开发避坑==）
+## 7.5 索引失效场景（==开发避坑==）
 
 ```sql
 -- ❌ 索引失效常见场景
@@ -710,7 +1214,7 @@ SELECT * FROM `user` WHERE `email` IS NULL;
 SELECT * FROM `user` WHERE `id` NOT IN (1, 2, 3);
 ```
 
-## 6.6 EXPLAIN 执行计划分析
+## 7.6 EXPLAIN 执行计划分析
 
 ```sql
 EXPLAIN SELECT u.`username`, o.`order_no` 
@@ -743,7 +1247,7 @@ WHERE u.`status` = 1 \G
 > - ==Extra 尽量避免 `filesort` 和 `temporary`==
 > - ==rows 越小越好，说明扫描的数据量少==
 
-## 6.7 覆盖索引与回表
+## 7.7 覆盖索引与回表
 
 ```sql
 -- 表有联合索引 idx_name_age (username, age)
@@ -760,9 +1264,9 @@ SELECT `username`, `age` FROM `user` WHERE `username` = '张三';
 > ==**覆盖索引优化**：尽量让 SELECT 的字段都在索引中，避免回表。Extra 显示 `Using index` 说明是覆盖索引，性能最优。==
 
 
-# 7. 事务（Transaction）（面试高频）
+# 8. 事务（Transaction）（面试高频）
 
-## 7.1 ACID 特性
+## 8.1 ACID 特性
 
 |     |           特性 | 含义 | 实现机制 |
 | :-: |:----:|:----|:--------|
@@ -771,7 +1275,7 @@ SELECT `username`, `age` FROM `user` WHERE `username` = '张三';
 |     |           **I**solation（隔离性） | 并发事务互不干扰 | 锁 + MVCC |
 |     |           **D**urability（持久性） | 提交后数据永久保存 | redo log（重做日志） |
 
-## 7.2 隔离级别
+## 8.2 隔离级别
 
 |     |           隔离级别 | 脏读 | 不可重复读 | 幻读 | 说明 |
 | :-: |:---------:|:----:|:----------:|:----:|:------|
@@ -791,7 +1295,7 @@ SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
 > ==**MySQL 默认是 REPEATABLE READ**，但很多互联网公司改为 **READ COMMITTED**（性能更好，配合 binlog row 模式可避免很多问题）。==
 
-## 7.3 MVCC（多版本并发控制，==面试重难点==）
+## 8.3 MVCC（多版本并发控制，==面试重难点==）
 
 ```
 MVCC 核心组件：
@@ -824,7 +1328,7 @@ MVCC 核心组件：
 
 > ==**MVCC + 间隙锁解决了 REPEATABLE READ 的幻读问题**（InnoDB 在 RR 级别下基本不会出现幻读）。==
 
-## 7.4 事务操作
+## 8.4 事务操作
 
 ```sql
 -- 开启事务
@@ -847,7 +1351,7 @@ SAVEPOINT sp1;
 ROLLBACK TO sp1;
 ```
 
-## 7.5 Spring 事务使用
+## 8.5 Spring 事务使用
 
 ```java
 // 在 Service 层使用 @Transactional
@@ -877,9 +1381,9 @@ public class OrderService {
 > - ==事务必须通过代理对象调用才能生效（同类方法直接调用无效！）==
 
 
-# 8. 锁机制
+# 9. 锁机制
 
-## 8.1 行锁（Row Lock）
+## 9.1 行锁（Row Lock）
 
 ```sql
 -- 行锁是 InnoDB 默认锁机制，只锁住被操作的行
@@ -894,7 +1398,7 @@ SELECT * FROM `user` WHERE `id` = 1 FOR UPDATE;
 
 > ==**行锁依赖索引**：如果 WHERE 条件不走索引，行锁会升级为表锁！==
 
-## 8.2 表锁（Table Lock）
+## 9.2 表锁（Table Lock）
 
 ```sql
 -- 手动加表锁
@@ -904,7 +1408,7 @@ LOCK TABLES `user` WRITE;  -- 写锁（排他）
 UNLOCK TABLES;             -- 释放表锁
 ```
 
-## 8.3 间隙锁（Gap Lock）
+## 9.3 间隙锁（Gap Lock）
 
 ```
 间隙锁锁定一个范围（不包含记录本身），防止幻读。
@@ -920,7 +1424,7 @@ SELECT * FROM user WHERE id BETWEEN 3 AND 8 FOR UPDATE;
 
 > ==**间隙锁只在 REPEATABLE READ 级别有效**，RC 级别没有间隙锁。==
 
-## 8.4 死锁
+## 9.4 死锁
 
 ```sql
 -- 死锁排查（重要）
@@ -944,9 +1448,9 @@ KILL <trx_mysql_thread_id>;
 > 4. ==合理设计索引，让行锁更精确==
 
 
-# 9. SQL 性能优化（实战重点）
+# 10. SQL 性能优化（实战重点）
 
-## 9.1 慢查询日志
+## 10.1 慢查询日志
 
 ```sql
 -- 查看是否开启慢查询日志
@@ -962,7 +1466,7 @@ SET GLOBAL log_queries_not_using_indexes = ON;  -- 没走索引的也记录
 mysqldumpslow -s t -t 10 /var/lib/mysql/slow.log  -- 按时间排序取前10
 ```
 
-## 9.2 SQL 优化原则
+## 10.2 SQL 优化原则
 
 ```sql
 -- ✅ 1. 避免 SELECT *，只查需要的字段
@@ -991,7 +1495,7 @@ SELECT * FROM `user` WHERE `create_time` >= '2026-06-17 00:00:00'
 -- ✅ 6. 用 EXISTS 替代 IN（当子表数据量大时）
 ```
 
-## 9.3 优化口诀
+## 10.3 优化口诀
 
 ```
 全值匹配我最爱，最左前缀要遵守；
@@ -1002,7 +1506,7 @@ LIKE百分写最右，覆盖索引不写星；
 VAR引号不可丢，SQL优化有诀窍。
 ```
 
-## 9.4 分表策略
+## 10.4 分表策略
 
 ```sql
 -- 水平分表：按某个字段取模分表（按 user_id 分 16 张表）
@@ -1017,9 +1521,9 @@ VAR引号不可丢，SQL优化有诀窍。
 > ==**分表场景**：单表超过 1000 万行或超过 50GB 时考虑分表。优先考虑索引优化、读写分离，最后才分表。==
 
 
-# 10. 常用函数与语法
+# 11. 常用函数与语法
 
-## 10.1 字符串函数
+## 11.1 字符串函数
 
 ```sql
 SELECT CONCAT('Hello', ' ', 'World');          -- 字符串拼接
@@ -1036,7 +1540,7 @@ SELECT TRIM                                     --去除字符串前后空白
 
 ```
 
-## 10.2 数字函数
+## 11.2 数字函数
 
 ```sql
 SELECT ABS(-12.5);                            -- 绝对值: 12.5
@@ -1052,7 +1556,7 @@ SELECT FORMAT(1234567.8, 2);                   -- 格式化: '1,234,567.80'
 
 > ==**金额处理**：存储使用 DECIMAL；ROUND 用于展示或按规则计算；FORMAT 返回字符串，不要用于继续数值运算。==
 
-## 10.3 分组（聚合）函数
+## 11.3 分组（聚合）函数
 
 ```sql
 -- COUNT(*) 统计所有行，COUNT(字段) 忽略 NULL
@@ -1075,7 +1579,7 @@ GROUP BY status;
 
 > ==聚合函数通常与 `GROUP BY` 配合使用；`WHERE` 在分组前过滤，`HAVING` 在聚合后过滤。`SUM`、`AVG`、`MAX`、`MIN` 都会忽略 `NULL`。==
 
-## 10.4 日期函数
+## 11.4 日期函数
 
 ```sql
 SELECT NOW();                                   -- 当前日期时间
@@ -1089,7 +1593,7 @@ SELECT UNIX_TIMESTAMP(NOW());                   -- 转时间戳
 SELECT FROM_UNIXTIME(1718612345);               -- 时间戳转日期
 ```
 
-## 10.5 条件与流程控制
+## 11.5 条件与流程控制
 
 ```sql
 -- IF 函数
@@ -1108,7 +1612,7 @@ FROM `user`;
 SELECT `username`, IFNULL(`email`, '未填写') AS `email` FROM `user`;
 ```
 
-## 10.6 窗口函数（MySQL 8.0+，==面试加分项==）
+## 11.6 窗口函数（MySQL 8.0+，==面试加分项==）
 
 ```sql
 -- ROW_NUMBER()：排名（无重复）
@@ -1145,9 +1649,9 @@ FROM `employee`;
 
 # Part 3：MyBatis-Plus（开发实战）
 
-# 11. 快速开始
+# 12. 快速开始
 
-## 11.1 依赖引入（Spring Boot 3.x）
+## 12.1 依赖引入（Spring Boot 3.x）
 
 ```xml
 <dependency>
@@ -1166,7 +1670,7 @@ FROM `employee`;
 </dependency>
 ```
 
-## 11.2 配置 application.yml
+## 12.2 配置 application.yml
 
 ```yaml
 spring:
@@ -1196,7 +1700,7 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml  # Mapper XML 路径
 ```
 
-## 11.3 Spring Boot 启动类
+## 12.3 Spring Boot 启动类
 
 ```java
 @SpringBootApplication
@@ -1208,7 +1712,7 @@ public class Application {
 }
 ```
 
-## 11.4 实体类与 Mapper
+## 12.4 实体类与 Mapper
 
 ```java
 @Data
@@ -1248,9 +1752,9 @@ public interface UserMapper extends BaseMapper<User> {
 > ==**BaseMapper 内置方法**：`insert`、`deleteById`、`updateById`、`selectById`、`selectList`、`selectPage` 等，无需手写 SQL。==
 
 
-# 12. CRUD 接口
+# 13. CRUD 接口
 
-## 12.1 Insert
+## 13.1 Insert
 
 ```java
 // 基础插入
@@ -1262,7 +1766,7 @@ int rows = userMapper.insert(user);          // 返回影响行数
 Long id = user.getId();                      // 插入后主键自动回填到对象
 ```
 
-## 12.2 Delete
+## 13.2 Delete
 
 ```java
 // 根据 ID 删除
@@ -1279,7 +1783,7 @@ userMapper.deleteBatchIds(Arrays.asList(1L, 2L, 3L));
 userMapper.deleteById(1L);   // 实际执行：UPDATE user SET deleted=1 WHERE id=1
 ```
 
-## 12.3 Update
+## 13.3 Update
 
 ```java
 // 根据 ID 更新
@@ -1297,7 +1801,7 @@ userMapper.update(
 
 > ==**updateById 特点**：只更新非 null 字段，配合 `@Version` 乐观锁时能防并发覆盖。==
 
-## 12.4 Select
+## 13.4 Select
 
 ```java
 // === 单个查询 ===
@@ -1334,9 +1838,9 @@ long pages = page.getPages();                       // 总页数
 ```
 
 
-# 13. 条件构造器 Wrapper（重点）
+# 14. 条件构造器 Wrapper（重点）
 
-## 13.1 QueryWrapper（基本条件）
+## 14.1 QueryWrapper（基本条件）
 
 ```java
 // === 基础条件 ===
@@ -1382,7 +1886,7 @@ QueryWrapper<User> qw = new QueryWrapper<User>()
     .last("LIMIT 10");            // 追加原生 SQL 片段
 ```
 
-## 13.2 LambdaQueryWrapper（类型安全，推荐）
+## 14.2 LambdaQueryWrapper（类型安全，推荐）
 
 ```java
 // 使用 Lambda 表达式，不写字符串字段名（避免拼写错误）
@@ -1404,7 +1908,7 @@ lqw.and(w ->
 
 > ==**开发推荐**：优先使用 `LambdaQueryWrapper`，避免写字符串字段名，编译期就能发现错误。==
 
-## 13.3 UpdateWrapper（更新用）
+## 14.3 UpdateWrapper（更新用）
 
 ```java
 // 更新时使用 Wrapper 指定条件
@@ -1425,7 +1929,7 @@ lu.set(User::getEmail, "new@example.com")
 userMapper.update(null, lu);
 ```
 
-## 13.4 复杂查询示例
+## 14.4 复杂查询示例
 
 ```java
 // === 多条件组合查询 ===
@@ -1445,7 +1949,7 @@ QueryWrapper<User> qw = new QueryWrapper<>();
 qw.inSql("id", "SELECT user_id FROM `order` WHERE amount > 100");
 ```
 
-## 13.5 Wrapper 方法速查表
+## 14.5 Wrapper 方法速查表
 
 |     |           方法 | SQL 片段 | 说明 |
 | :-: |:----:|:---------|:----|
@@ -1466,9 +1970,9 @@ qw.inSql("id", "SELECT user_id FROM `order` WHERE amount > 100");
 |     |           `apply` | 原生 SQL 片段 | 拼接任意 SQL |
 
 
-# 14. 分页插件
+# 15. 分页插件
 
-## 14.1 配置分页插件
+## 15.1 配置分页插件
 
 ```java
 @Configuration
@@ -1492,7 +1996,7 @@ public class MyBatisPlusConfig {
 }
 ```
 
-## 14.2 分页使用
+## 15.2 分页使用
 
 ```java
 // === 基本分页 ===
@@ -1526,9 +2030,9 @@ Page<UserVO> selectUserPage(Page<UserVO> page, @Param("param") UserQueryParam pa
 > ==**分页注意**：自定义 XML 分页时，参数中必须有 `Page` 对象且为第一个参数，MP 会自动拦截 SQL 加 `LIMIT`。==
 
 
-# 15. 自动填充
+# 16. 自动填充
 
-## 15.1 实现 MetaObjectHandler
+## 16.1 实现 MetaObjectHandler
 
 ```java
 @Component
@@ -1555,7 +2059,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 }
 ```
 
-## 15.2 实体类配置
+## 16.2 实体类配置
 
 ```java
 @Data
@@ -1579,9 +2083,9 @@ public class User {
 > ==**自动填充 vs 数据库 DEFAULT**：推荐用 MP 自动填充（`MetaObjectHandler`）而非数据库的 `CURRENT_TIMESTAMP`。代码层面更可控，且能填充操作人字段。==
 
 
-# 16. 逻辑删除
+# 17. 逻辑删除
 
-## 16.1 配置
+## 17.1 配置
 
 ```yaml
 mybatis-plus:
@@ -1592,7 +2096,7 @@ mybatis-plus:
       logic-not-delete-value: 0           # 未删除的值（默认 0）
 ```
 
-## 16.2 实体类
+## 17.2 实体类
 
 ```java
 @Data
@@ -1604,7 +2108,7 @@ public class User {
 }
 ```
 
-## 16.3 使用效果
+## 17.3 使用效果
 
 ```java
 // 删除→自动变成 UPDATE 逻辑删除
@@ -1626,16 +2130,16 @@ userMapper.selectList(new QueryWrapper<User>().last("AND deleted=1"));
 > - ==逻辑删除的字段也建议建索引==
 
 
-# 17. 乐观锁
+# 18. 乐观锁
 
-## 17.1 配置
+## 18.1 配置
 
 ```java
 // 在 MybatisPlusInterceptor 中添加乐观锁插件
 interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
 ```
 
-## 17.2 实体类
+## 18.2 实体类
 
 ```java
 @Data
@@ -1647,7 +2151,7 @@ public class User {
 }
 ```
 
-## 17.3 使用效果
+## 18.3 使用效果
 
 ```java
 // 先查询
@@ -1673,9 +2177,9 @@ if (!success) {
 > - ==更新时必须带上 `@Version` 字段的旧值==
 
 
-# 18. 代码生成器
+# 19. 代码生成器
 
-## 18.1 依赖
+## 19.1 依赖
 
 ```xml
 <dependency>
@@ -1690,7 +2194,7 @@ if (!success) {
 </dependency>
 ```
 
-## 18.2 自动生成代码
+## 19.2 自动生成代码
 
 ```java
 public class CodeGenerator {
@@ -1731,9 +2235,9 @@ public class CodeGenerator {
 > ==**生成器是提效神器**：数据库建好表后直接生成 Entity、Mapper、Service、Controller，几分钟就能完成基础 CRUD。==
 
 
-# 19. 多数据源
+# 20. 多数据源
 
-## 19.1 依赖
+## 20.1 依赖
 
 ```xml
 <dependency>
@@ -1743,7 +2247,7 @@ public class CodeGenerator {
 </dependency>
 ```
 
-## 19.2 配置
+## 20.2 配置
 
 ```yaml
 spring:
@@ -1764,7 +2268,7 @@ spring:
           driver-class-name: com.mysql.cj.jdbc.Driver
 ```
 
-## 19.3 使用
+## 20.3 使用
 
 ```java
 // Service 或 Mapper 上指定数据源
@@ -1788,9 +2292,9 @@ public class UserServiceImpl implements UserService {
 ```
 
 
-# 20. MyBatis-Plus 高级技巧（面试/实战）
+# 21. MyBatis-Plus 高级技巧（面试/实战）
 
-## 20.1 Service 层 CRUD 封装
+## 21.1 Service 层 CRUD 封装
 
 ```java
 // 继承 IService，直接获得更多封装好的 CRUD 方法
@@ -1819,7 +2323,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 }
 ```
 
-## 20.2 自定义 SQL + MyBatis-Plus 条件
+## 21.2 自定义 SQL + MyBatis-Plus 条件
 
 ```java
 // Mapper 接口
@@ -1839,7 +2343,7 @@ public interface UserMapper extends BaseMapper<User> {
 // </select>
 ```
 
-## 20.3 类型处理器（TypeHandler）
+## 21.3 类型处理器（TypeHandler）
 
 ```java
 // 场景：JSON 字段自动序列化/反序列化
@@ -1856,7 +2360,7 @@ public class Product {
 // MySQL 字段类型：JSON
 ```
 
-## 20.4 常见问题 FAQ
+## 21.4 常见问题 FAQ
 
 ```java
 // ❌ 问题1：updateById 更新 null 字段无效
