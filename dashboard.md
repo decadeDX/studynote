@@ -27,12 +27,9 @@ columns:
 
 ## 备忘录
 
-### 2026-06-09 备忘录
-id: card-mq63iyxp
-完成java反射
-
 ### 2026-07-01 备忘录
 id: card-mr1p9wek
+type: generic
 java学习重要程度：
 Redis+点评+消息队列，FastAPI+LangChain+LangGraph
 
@@ -42,9 +39,9 @@ Redis+点评+消息队列，FastAPI+LangChain+LangGraph
 id: card-mqc2j5cc
 type: task
 - [ ] 本周任务
-- [ ] Mysql
-- [ ] 操作系统
 - [ ] SpringMVC
+- [x] Mysql
+- [x] 操作系统
 
 ### 代办清单
 id: card-mq63h2de
@@ -66,6 +63,12 @@ type: project
 id: card-mq63irzl
 type: project
 - [[FreeRTOS学习笔记]]
+
+### Mysql
+id: card-mv3k0r5e
+type: project
+- [[学习笔记/笔记/数据库/Mysql.md]]
+- [[学习笔记/笔记/数据库/数据交换格式.md]]
 
 ## 需要用的知识库/目录
 
